@@ -1,69 +1,100 @@
 import express from "express";
 import dotenv from "dotenv";
 import OpenAI from "openai";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
+
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 app.use(express.json({ limit: "1mb" }));
-app.use(express.static("public"));
-
-if (!process.env.OPENAI_API_KEY) {
-  console.warn("WARNING: OPENAI_API_KEY is missing. Create a .env file.");
-}
-
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const modeInstructions = {
-  handwritten: "Create clear handwritten-notebook-style study notes using headings, short bullet points, simple language, memory tips and a brief summary.",
-  visualise: "Teach through vivid visual imagination. Describe the topic as a step-by-step visual journey. Use simple scenes, comparisons and mental pictures.",
-  teachme: "Act as an excellent friendly secondary-school teacher. Explain from basics to deeper understanding using age-appropriate language and examples.",
-  quiz: "Create a varied secondary-school quiz with 10 questions. Mix multiple choice, short answer and application questions. Put answers in a clearly labelled section at the end.",
-  flashcard: "Create 10 concise revision flashcards. Format each as 'Question:' followed by 'Answer:'. Focus on key facts and exam recall.",
-  notes: "Create excellent revision notes for a secondary-school student with a definition, key ideas, important vocabulary, examples, common mistakes and a quick summary."
+  handwritten:
+    "Create concise handwritten-style study notes with headings, short bullet points, arrows, keywords, and simple explanations.",
+
+  visualise:
+    "Help a secondary-school student visualise the topic with a clear labelled educational diagram description and explanation.",
+
+  teachme:
+    "Teach the topic step by step for a secondary-school student. Start simple, give an example, and finish with a recap.",
+
+  quiz:
+    "Create a secondary-school quiz with a mixture of questions and a separate answer section at the end.",
+
+  flashcard:
+    "Create useful revision flashcards in Question / Answer format. Keep answers concise and accurate.",
+
+  notes:
+    "Create well-organised revision notes with headings, key facts, definitions, examples, and a short summary."
 };
 
 app.post("/api/generate", async (req, res) => {
   try {
-    const { topic, mode } = req.body;
-    if (!topic || typeof topic !== "string") {
-      return res.status(400).json({ error: "Please enter a topic." });
-    }
-    if (!modeInstructions[mode]) {
-      return res.status(400).json({ error: "Invalid learning mode." });
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({
+        error: "OPENAI_API_KEY is not configured."
+      });
     }
 
-    const prompt = `Topic: ${topic}
+    const { mode, topic } = req.body || {};
 
-${modeInstructions[mode]}
+    if (!topic || !String(topic).trim()) {
+      return res.status(400).json({
+        error: "Please enter a topic."
+      });
+    }
 
-Rules:
-- Aim at secondary-school students.
-- Be accurate, engaging and encouraging.
-- Use Markdown formatting.
-- Do not claim knowledge that is uncertain.
-- Keep the response focused on the requested topic.`;
+    const client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
 
     const completion = await client.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: "You are AI Learning Hub, a safe and engaging educational assistant for secondary-school students." },
-        { role: "user", content: prompt }
-      ],
-      temperature: 0.7
+        {
+          role: "system",
+          content:
+            "You are AI Learning Hub, a safe, accurate and engaging educational assistant for secondary-school students."
+        },
+        {
+          role: "user",
+          content:
+            `${modeInstructions[mode] || modeInstructions.teachme}
+
+Topic or request:
+${String(topic).trim()}`
+        }
+      ]
     });
 
-    const text = completion.choices?.[0]?.message?.content || "No response generated.";
-    res.json({ text });
+    res.json({
+      text:
+        completion.choices?.[0]?.message?.content ||
+        "No response was generated."
+    });
   } catch (error) {
     console.error(error);
+
     res.status(500).json({
-      error: "Unable to generate the learning content. Check your API key and server connection."
+      error:
+        error?.message ||
+        "Something went wrong while generating the response."
     });
   }
 });
 
-app.listen(port, () => {
-  console.log(`AI Learning Switchboard running at http://localhost:${port}`);
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+app.use(express.static(__dirname));
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`AI Learning Switchboard running on port ${PORT}`);
 });
