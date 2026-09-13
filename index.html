@@ -1,63 +1,1602 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Learning Hub</title>
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<title>
+AI Learning Switchboard
+</title>
+
 <style>
-*{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;color:#24324a;background:linear-gradient(135deg,#fff4fa,#edfaff,#f7f1ff);min-height:100vh;padding:22px}
-.wrap{max-width:1100px;margin:auto} header{text-align:center;padding:18px}.logo{display:inline-block;background:#fff;padding:10px 18px;border-radius:999px;font-weight:800;box-shadow:0 10px 30px #24324a18}
-h1{font-size:clamp(2.1rem,6vw,4rem);margin:18px 0 7px;background:linear-gradient(90deg,#ff4f8b,#8b5cf6,#06b6d4,#22c55e);-webkit-background-clip:text;color:transparent}.sub{color:#64748b;margin:0 auto;max-width:700px}
-.panel,.result-card{background:#ffffffdd;backdrop-filter:blur(10px);border-radius:28px;padding:24px;box-shadow:0 12px 35px #24324a18;margin-top:22px}.title{font-weight:800;font-size:1.1rem;margin-bottom:16px}
-.switches{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.sw{border:0;border-radius:22px;padding:18px;text-align:left;cursor:pointer;min-height:125px;box-shadow:0 7px 18px #24324a12;transition:.2s;background:#fff;color:#24324a}.sw:hover{transform:translateY(-3px)}.sw.active{outline:4px solid #8b5cf655}.sw .e{font-size:2rem;display:block;margin-bottom:8px}.sw small{display:block;color:#64748b;margin-top:6px}
-.sw:nth-child(1){background:#ffe5ef}.sw:nth-child(2){background:#dff8ff}.sw:nth-child(3){background:#ece5ff}.sw:nth-child(4){background:#fff4bf}.sw:nth-child(5){background:#dcfae7}.sw:nth-child(6){background:#ffe9d7}
-label{display:block;font-weight:800;margin:22px 0 9px}textarea{width:100%;min-height:105px;border:2px solid #e5e7eb;border-radius:18px;padding:16px;font:inherit;font-size:1rem;outline:none}textarea:focus{border-color:#8b5cf6}.actions{display:flex;gap:12px;margin-top:15px;flex-wrap:wrap}button.action{border:0;border-radius:15px;padding:14px 20px;font-weight:800;font-size:1rem;cursor:pointer}.generate{color:white;background:linear-gradient(90deg,#ff4f8b,#8b5cf6,#06b6d4)}.clear{background:#eef2f7}.result{display:none}.result.show{display:block}.head{display:flex;gap:12px;align-items:center}.head h2{margin:0}.badge{background:#eef2ff;padding:6px 10px;border-radius:999px;font-weight:800;font-size:.85rem;display:inline-block;margin-top:4px}.content{line-height:1.65;margin-top:18px}.content h1,.content h2,.content h3{color:#5b21b6}.content pre{white-space:pre-wrap;font-family:inherit}.loading{padding:25px;text-align:center;font-size:1.1rem}.spinner{display:inline-block;width:24px;height:24px;border:4px solid #ddd;border-top-color:#8b5cf6;border-radius:50%;animation:spin 1s linear infinite;vertical-align:middle}@keyframes spin{to{transform:rotate(360deg)}}.error{background:#fff0f0;color:#a11;padding:14px;border-radius:14px}@media(max-width:700px){body{padding:12px}.switches{grid-template-columns:repeat(2,1fr)}.panel,.result-card{padding:16px}}
-</style>
-</head>
-<body>
-<div class="wrap">
-<header><div class="logo">🌟 AI LEARNING HUB</div><h1>Learn. Explore. Create.</h1><p class="sub">Choose a learning switch and let AI create personalised content for you.</p></header>
 
-<div class="panel">
-<div class="title">🎛️ Choose your learning switch</div>
-<div class="switches">
-<button class="sw active" data-mode="handwritten"><span class="e">✍️</span><b>/handwritten</b><small>Notebook-style study notes</small></button>
-<button class="sw" data-mode="visualise"><span class="e">👁️</span><b>/visualise</b><small>Learn through imagination</small></button>
-<button class="sw" data-mode="teachme"><span class="e">🎓</span><b>/teachme</b><small>Friendly teacher explanation</small></button>
-<button class="sw" data-mode="quiz"><span class="e">❓</span><b>/quiz</b><small>Test your knowledge</small></button>
-<button class="sw" data-mode="flashcard"><span class="e">🃏</span><b>/flashcard</b><small>Quick revision cards</small></button>
-<button class="sw" data-mode="notes"><span class="e">📝</span><b>/notes</b><small>Smart revision notes</small></button>
-</div>
-<label for="topic">🧠 What do you want to learn?</label>
-<textarea id="topic" placeholder="Example: Mitochondria for Year 9"></textarea>
-<div class="actions"><button class="action generate" id="generate">🚀 Generate with AI</button><button class="action clear" id="clear">Clear</button></div>
-</div>
-
-<div class="result" id="result"><div class="result-card"><div class="head"><div id="emoji" style="font-size:2rem">✍️</div><div><h2 id="heading">Your Learning Result</h2><span class="badge" id="badge">/handwritten</span></div></div><div class="content" id="content"></div></div></div>
-</div>
-<script>
-const info={handwritten:["✍️","Handwritten-Style Notes","/handwritten"],visualise:["👁️","Visual Learning Journey","/visualise"],teachme:["🎓","Teach Me","/teachme"],quiz:["❓","Knowledge Quiz","/quiz"],flashcard:["🃏","Revision Flashcards","/flashcard"],notes:["📝","Smart Study Notes","/notes"]};
-let mode="handwritten";
-document.querySelectorAll(".sw").forEach(b=>b.onclick=()=>{mode=b.dataset.mode;document.querySelectorAll(".sw").forEach(x=>x.classList.remove("active"));b.classList.add("active")});
-function markdown(text){
- let safe=text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
- safe=safe.replace(/^### (.*)$/gm,"<h3>$1</h3>").replace(/^## (.*)$/gm,"<h2>$1</h2>").replace(/^# (.*)$/gm,"<h1>$1</h1>");
- safe=safe.replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>").replace(/\*(.*?)\*/g,"<em>$1</em>");
- safe=safe.replace(/^- (.*)$/gm,"• $1");
- return safe.split(/\n\n+/).map(p=>p.startsWith("<h")||p.startsWith("•")?p:`<p>${p.replace(/\n/g,"<br>")}</p>`).join("");
+* {
+  box-sizing: border-box;
 }
-document.getElementById("generate").onclick=async()=>{
- const topic=document.getElementById("topic").value.trim(); if(!topic){document.getElementById("topic").focus();return;}
- const r=document.getElementById("result"),c=document.getElementById("content"),i=info[mode];
- document.getElementById("emoji").textContent=i[0];document.getElementById("heading").textContent=i[1];document.getElementById("badge").textContent=i[2];
- r.classList.add("show");c.innerHTML='<div class="loading"><span class="spinner"></span> AI is preparing your learning activity...</div>';r.scrollIntoView({behavior:"smooth"});
- try{
-  const response=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic,mode})});
-  const data=await response.json(); if(!response.ok)throw new Error(data.error||"Something went wrong");
-  c.innerHTML=markdown(data.text);
- }catch(e){c.innerHTML='<div class="error">⚠️ '+e.message+'</div>';}
+
+:root {
+
+  --ink: #24324a;
+
+  --muted: #64748b;
+
+  --shadow:
+    0 12px 35px
+    rgba(36,50,74,.13);
+
+}
+
+body {
+
+  margin: 0;
+
+  min-height: 100vh;
+
+  font-family:
+    Inter,
+    ui-rounded,
+    "SF Pro Rounded",
+    Arial,
+    sans-serif;
+
+  color: var(--ink);
+
+  background:
+
+    radial-gradient(
+      circle at 10% 10%,
+      #ffd6f6 0 10%,
+      transparent 28%
+    ),
+
+    radial-gradient(
+      circle at 90% 15%,
+      #c9f5ff 0 10%,
+      transparent 28%
+    ),
+
+    radial-gradient(
+      circle at 80% 90%,
+      #fff0b8 0 10%,
+      transparent 28%
+    ),
+
+    linear-gradient(
+      135deg,
+      #f7f5ff,
+      #eafcff 50%,
+      #fff7f1
+    );
+
+  padding: 24px;
+}
+
+.wrap {
+
+  max-width: 1100px;
+
+  margin: auto;
+
+}
+
+header {
+
+  text-align: center;
+
+  padding:
+    22px
+    15px
+    10px;
+
+}
+
+.logo {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  background: white;
+
+  padding:
+    10px
+    18px;
+
+  border-radius: 999px;
+
+  box-shadow:
+    var(--shadow);
+
+  font-weight: 800;
+
+}
+
+h1 {
+
+  margin:
+    18px
+    0
+    8px;
+
+  font-size:
+    clamp(
+      2rem,
+      5vw,
+      3.5rem
+    );
+
+}
+
+.gradient-text {
+
+  background:
+    linear-gradient(
+      90deg,
+      #ff5f8f,
+      #8b5cf6,
+      #06b6d4,
+      #22c55e
+    );
+
+  -webkit-background-clip:
+    text;
+
+  background-clip:
+    text;
+
+  color:
+    transparent;
+
+}
+
+.subtitle {
+
+  color:
+    var(--muted);
+
+  font-size:
+    1.05rem;
+
+  margin:
+    0 auto;
+
+  max-width:
+    700px;
+
+}
+
+.panel {
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      .84
+    );
+
+  backdrop-filter:
+    blur(12px);
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      .9
+    );
+
+  border-radius:
+    28px;
+
+  box-shadow:
+    var(--shadow);
+
+  padding:
+    24px;
+
+  margin-top:
+    24px;
+
+}
+
+.section-title {
+
+  font-size:
+    1.15rem;
+
+  font-weight:
+    800;
+
+  margin:
+    0 0 16px;
+
+}
+
+.switches {
+
+  display:
+    grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      1fr
+    );
+
+  gap:
+    14px;
+
+}
+
+.switch {
+
+  border:
+    0;
+
+  cursor:
+    pointer;
+
+  text-align:
+    left;
+
+  padding:
+    18px;
+
+  border-radius:
+    22px;
+
+  color:
+    var(--ink);
+
+  background:
+    white;
+
+  box-shadow:
+    0 7px 20px
+    rgba(
+      36,
+      50,
+      74,
+      .08
+    );
+
+  transition:
+    .2s transform,
+    .2s box-shadow,
+    .2s outline;
+
+  min-height:
+    118px;
+
+}
+
+.switch:hover {
+
+  transform:
+    translateY(-3px);
+
+}
+
+.switch.active {
+
+  outline:
+    4px solid
+    rgba(
+      37,
+      99,
+      235,
+      .35
+    );
+
+  transform:
+    translateY(-2px);
+
+}
+
+.switch .emoji {
+
+  font-size:
+    2rem;
+
+  display:
+    block;
+
+  margin-bottom:
+    8px;
+
+}
+
+.switch strong {
+
+  display:
+    block;
+
+  font-size:
+    1.05rem;
+
+}
+
+.switch small {
+
+  display:
+    block;
+
+  color:
+    var(--muted);
+
+  margin-top:
+    5px;
+
+  line-height:
+    1.35;
+
+}
+
+.hand {
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffe0ec,
+      #fff
+    );
+
+}
+
+.visual {
+
+  background:
+    linear-gradient(
+      135deg,
+      #d9f7ff,
+      #fff
+    );
+
+}
+
+.teach {
+
+  background:
+    linear-gradient(
+      135deg,
+      #e5ddff,
+      #fff
+    );
+
+}
+
+.quiz {
+
+  background:
+    linear-gradient(
+      135deg,
+      #fff1b8,
+      #fff
+    );
+
+}
+
+.flash {
+
+  background:
+    linear-gradient(
+      135deg,
+      #d8f9e5,
+      #fff
+    );
+
+}
+
+.notes {
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffe5cc,
+      #fff
+    );
+
+}
+
+label {
+
+  display:
+    block;
+
+  font-weight:
+    800;
+
+  margin:
+    22px 0 9px;
+
+}
+
+textarea {
+
+  width:
+    100%;
+
+  min-height:
+    105px;
+
+  resize:
+    vertical;
+
+  border:
+    2px solid #e5e7eb;
+
+  border-radius:
+    18px;
+
+  padding:
+    16px;
+
+  font:
+    inherit;
+
+  font-size:
+    1rem;
+
+  outline:
+    none;
+
+}
+
+textarea:focus {
+
+  border-color:
+    #8b5cf6;
+
+  box-shadow:
+    0 0 0 4px
+    rgba(
+      139,
+      92,
+      246,
+      .12
+    );
+
+}
+
+.hint {
+
+  color:
+    var(--muted);
+
+  font-size:
+    .9rem;
+
+  margin-top:
+    8px;
+
+}
+
+.actions {
+
+  display:
+    flex;
+
+  gap:
+    12px;
+
+  flex-wrap:
+    wrap;
+
+  margin-top:
+    16px;
+
+}
+
+.generate,
+.clear {
+
+  border:
+    0;
+
+  cursor:
+    pointer;
+
+  padding:
+    14px 20px;
+
+  border-radius:
+    15px;
+
+  font-weight:
+    800;
+
+  font-size:
+    1rem;
+
+}
+
+.generate {
+
+  color:
+    white;
+
+  background:
+    linear-gradient(
+      90deg,
+      #ff5f8f,
+      #8b5cf6,
+      #06b6d4
+    );
+
+  box-shadow:
+    0 10px 22px
+    rgba(
+      139,
+      92,
+      246,
+      .25
+    );
+
+}
+
+.generate:disabled {
+
+  opacity:
+    .6;
+
+  cursor:
+    not-allowed;
+
+}
+
+.clear {
+
+  background:
+    #eef2f7;
+
+  color:
+    var(--ink);
+
+}
+
+.result {
+
+  margin-top:
+    24px;
+
+  display:
+    none;
+
+}
+
+.result.show {
+
+  display:
+    block;
+
+}
+
+.result-card {
+
+  background:
+    #fff;
+
+  border-radius:
+    24px;
+
+  padding:
+    24px;
+
+  box-shadow:
+    var(--shadow);
+
+  border-left:
+    8px solid
+    #8b5cf6;
+
+}
+
+.result-head {
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  gap:
+    12px;
+
+  margin-bottom:
+    16px;
+
+}
+
+.result-head h2 {
+
+  margin:
+    0;
+
+  font-size:
+    1.35rem;
+
+}
+
+.badge {
+
+  background:
+    #eef2ff;
+
+  padding:
+    7px 11px;
+
+  border-radius:
+    999px;
+
+  font-size:
+    .85rem;
+
+  font-weight:
+    800;
+
+}
+
+.content {
+
+  line-height:
+    1.65;
+
+}
+
+.generated-image {
+
+  width:
+    100%;
+
+  max-width:
+    760px;
+
+  height:
+    auto;
+
+  display:
+    block;
+
+  margin:
+    0 auto;
+
+  border-radius:
+    20px;
+
+  box-shadow:
+    0 10px 28px
+    rgba(
+      36,
+      50,
+      74,
+      .16
+    );
+
+}
+
+.loading {
+
+  padding:
+    18px;
+
+  border-radius:
+    16px;
+
+  background:
+    #f8fafc;
+
+  color:
+    #475569;
+
+}
+
+.error {
+
+  padding:
+    16px;
+
+  border-radius:
+    16px;
+
+  background:
+    #fff1f2;
+
+  color:
+    #9f1239;
+
+}
+
+footer {
+
+  text-align:
+    center;
+
+  color:
+    var(--muted);
+
+  padding:
+    28px 8px 8px;
+
+  font-size:
+    .9rem;
+
+}
+
+@media (
+  max-width:
+  700px
+) {
+
+  body {
+
+    padding:
+      14px;
+
+  }
+
+  .panel {
+
+    padding:
+      16px;
+
+    border-radius:
+      22px;
+
+  }
+
+  .switches {
+
+    grid-template-columns:
+      repeat(
+        2,
+        1fr
+      );
+
+    gap:
+      10px;
+
+  }
+
+  .switch {
+
+    min-height:
+      110px;
+
+    padding:
+      14px;
+
+  }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="wrap">
+
+<header>
+
+<div class="logo">
+
+🌟
+
+<span>
+AI LEARNING HUB
+</span>
+
+</div>
+
+<h1>
+
+<span class="gradient-text">
+
+Learn. Explore. Create.
+
+</span>
+
+</h1>
+
+<p class="subtitle">
+
+Choose a learning switch,
+type your topic and generate
+a personalised learning activity.
+
+</p>
+
+</header>
+
+<main class="panel">
+
+<p class="section-title">
+
+🎛️ Choose your learning switch
+
+</p>
+
+<div class="switches">
+
+<button
+  class="switch hand active"
+  data-mode="handwritten"
+>
+
+<span class="emoji">
+
+✍️
+
+</span>
+
+<strong>
+
+/handwritten
+
+</strong>
+
+<small>
+
+Generate a real
+handwritten notebook-style image
+
+</small>
+
+</button>
+
+
+<button
+  class="switch visual"
+  data-mode="visualise"
+>
+
+<span class="emoji">
+
+👁️
+
+</span>
+
+<strong>
+
+/visualise
+
+</strong>
+
+<small>
+
+Imagine and understand
+step by step
+
+</small>
+
+</button>
+
+
+<button
+  class="switch teach"
+  data-mode="teachme"
+>
+
+<span class="emoji">
+
+🎓
+
+</span>
+
+<strong>
+
+/teachme
+
+</strong>
+
+<small>
+
+A friendly teacher
+explains the topic
+
+</small>
+
+</button>
+
+
+<button
+  class="switch quiz"
+  data-mode="quiz"
+>
+
+<span class="emoji">
+
+❓
+
+</span>
+
+<strong>
+
+/quiz
+
+</strong>
+
+<small>
+
+Test your knowledge
+
+</small>
+
+</button>
+
+
+<button
+  class="switch flash"
+  data-mode="flashcard"
+>
+
+<span class="emoji">
+
+🃏
+
+</span>
+
+<strong>
+
+/flashcard
+
+</strong>
+
+<small>
+
+Quick revision cards
+
+</small>
+
+</button>
+
+
+<button
+  class="switch notes"
+  data-mode="notes"
+>
+
+<span class="emoji">
+
+📝
+
+</span>
+
+<strong>
+
+/notes
+
+</strong>
+
+<small>
+
+Important points
+and key facts
+
+</small>
+
+</button>
+
+</div>
+
+
+<label for="topic">
+
+🧠 What do you want to learn?
+
+</label>
+
+
+<textarea
+  id="topic"
+  placeholder="Try: Mitochondria, Human Heart, Photosynthesis..."
+></textarea>
+
+
+<div class="hint">
+
+For /handwritten,
+the result will be an actual
+AI-generated handwritten
+notebook image.
+
+</div>
+
+
+<div class="actions">
+
+<button
+  class="generate"
+  id="generate"
+>
+
+🚀 Generate Learning
+
+</button>
+
+
+<button
+  class="clear"
+  id="clear"
+>
+
+Clear
+
+</button>
+
+</div>
+
+</main>
+
+
+<section
+  class="result"
+  id="result"
+>
+
+<div class="result-card">
+
+<div class="result-head">
+
+<span
+  style="font-size:2rem"
+  id="resultEmoji"
+>
+
+✍️
+
+</span>
+
+<div>
+
+<h2 id="resultTitle">
+
+Your Learning Result
+
+</h2>
+
+<span
+  class="badge"
+  id="modeBadge"
+>
+
+/handwritten
+
+</span>
+
+</div>
+
+</div>
+
+<div
+  class="content"
+  id="content"
+></div>
+
+</div>
+
+</section>
+
+
+<footer>
+
+Made for curious
+secondary students 🚀📚
+
+</footer>
+
+</div>
+
+
+<script>
+
+const modes = {
+
+  handwritten: {
+
+    emoji:
+      "✍️",
+
+    title:
+      "Handwritten Notebook",
+
+    tag:
+      "/handwritten"
+
+  },
+
+  visualise: {
+
+    emoji:
+      "👁️",
+
+    title:
+      "Visual Learning Journey",
+
+    tag:
+      "/visualise"
+
+  },
+
+  teachme: {
+
+    emoji:
+      "🎓",
+
+    title:
+      "Teach Me",
+
+    tag:
+      "/teachme"
+
+  },
+
+  quiz: {
+
+    emoji:
+      "❓",
+
+    title:
+      "Knowledge Quiz",
+
+    tag:
+      "/quiz"
+
+  },
+
+  flashcard: {
+
+    emoji:
+      "🃏",
+
+    title:
+      "Revision Flashcards",
+
+    tag:
+      "/flashcard"
+
+  },
+
+  notes: {
+
+    emoji:
+      "📝",
+
+    title:
+      "Smart Study Notes",
+
+    tag:
+      "/notes"
+
+  }
+
 };
-document.getElementById("clear").onclick=()=>{document.getElementById("topic").value="";document.getElementById("result").classList.remove("show")};
+
+
+let selected =
+  "handwritten";
+
+
+const switches =
+  document.querySelectorAll(
+    ".switch"
+  );
+
+
+switches.forEach(
+
+  btn =>
+
+    btn.addEventListener(
+
+      "click",
+
+      () => {
+
+        selected =
+          btn.dataset.mode;
+
+        switches.forEach(
+
+          b =>
+
+            b.classList.remove(
+              "active"
+            )
+
+        );
+
+        btn.classList.add(
+          "active"
+        );
+
+      }
+
+    )
+
+);
+
+
+function escapeHtml(
+  value
+) {
+
+  const div =
+    document.createElement(
+      "div"
+    );
+
+  div.textContent =
+    value;
+
+  return div.innerHTML;
+
+}
+
+
+function simpleMarkdown(
+  text
+) {
+
+  return escapeHtml(
+    text
+  )
+
+  .replace(
+    /^### (.*$)/gim,
+    "<h3>$1</h3>"
+  )
+
+  .replace(
+    /^## (.*$)/gim,
+    "<h2>$1</h2>"
+  )
+
+  .replace(
+    /^# (.*$)/gim,
+    "<h1>$1</h1>"
+  )
+
+  .replace(
+    /\*\*(.*?)\*\*/gim,
+    "<strong>$1</strong>"
+  )
+
+  .replace(
+    /\n/g,
+    "<br>"
+  );
+
+}
+
+
+document
+.getElementById(
+  "generate"
+)
+.addEventListener(
+
+  "click",
+
+  async () => {
+
+    const topic =
+      document
+      .getElementById(
+        "topic"
+      )
+      .value
+      .trim();
+
+
+    if (!topic) {
+
+      document
+      .getElementById(
+        "topic"
+      )
+      .focus();
+
+      return;
+
+    }
+
+
+    const btn =
+      document
+      .getElementById(
+        "generate"
+      );
+
+
+    const mode =
+      modes[selected];
+
+
+    document
+    .getElementById(
+      "resultEmoji"
+    )
+    .textContent =
+      mode.emoji;
+
+
+    document
+    .getElementById(
+      "resultTitle"
+    )
+    .textContent =
+      mode.title;
+
+
+    document
+    .getElementById(
+      "modeBadge"
+    )
+    .textContent =
+      mode.tag;
+
+
+    document
+    .getElementById(
+      "content"
+    )
+    .innerHTML =
+
+      selected ===
+      "handwritten"
+
+      ?
+
+      `
+      <div class="loading">
+
+      🎨 Creating your
+      handwritten notebook page...
+
+      </div>
+      `
+
+      :
+
+      `
+      <div class="loading">
+
+      🤖 Generating your
+      learning result...
+
+      </div>
+      `;
+
+
+    document
+    .getElementById(
+      "result"
+    )
+    .classList
+    .add(
+      "show"
+    );
+
+
+    btn.disabled =
+      true;
+
+
+    btn.textContent =
+
+      selected ===
+      "handwritten"
+
+      ?
+
+      "🎨 Creating image..."
+
+      :
+
+      "⏳ Generating...";
+
+
+    try {
+
+      const response =
+        await fetch(
+
+          "/api/generate",
+
+          {
+
+            method:
+              "POST",
+
+            headers: {
+
+              "Content-Type":
+                "application/json"
+
+            },
+
+            body:
+              JSON.stringify({
+
+                mode:
+                  selected,
+
+                topic:
+                  topic
+
+              })
+
+          }
+
+        );
+
+
+      const data =
+        await response.json();
+
+
+      if (!response.ok) {
+
+        throw new Error(
+
+          data.error ||
+          "Generation failed."
+
+        );
+
+      }
+
+
+      if (
+        data.type ===
+        "image"
+        &&
+        data.image
+      ) {
+
+        document
+        .getElementById(
+          "content"
+        )
+        .innerHTML =
+
+          `
+          <img
+            class="generated-image"
+            src="${data.image}"
+            alt="Generated handwritten notes"
+          >
+          `;
+
+      }
+
+      else {
+
+        document
+        .getElementById(
+          "content"
+        )
+        .innerHTML =
+          simpleMarkdown(
+            data.text || ""
+          );
+
+      }
+
+
+      document
+      .getElementById(
+        "result"
+      )
+      .scrollIntoView({
+
+        behavior:
+          "smooth",
+
+        block:
+          "start"
+
+      });
+
+
+    }
+
+    catch (
+      error
+    ) {
+
+      document
+      .getElementById(
+        "content"
+      )
+      .innerHTML =
+
+        `
+        <div class="error">
+
+        <strong>
+        Generation error:
+        </strong>
+
+        <br>
+
+        ${escapeHtml(
+          error.message
+        )}
+
+        </div>
+        `;
+
+    }
+
+    finally {
+
+      btn.disabled =
+        false;
+
+      btn.textContent =
+        "🚀 Generate Learning";
+
+    }
+
+  }
+
+);
+
+
+document
+.getElementById(
+  "clear"
+)
+.addEventListener(
+
+  "click",
+
+  () => {
+
+    document
+    .getElementById(
+      "topic"
+    )
+    .value =
+      "";
+
+
+    document
+    .getElementById(
+      "result"
+    )
+    .classList
+    .remove(
+      "show"
+    );
+
+
+    document
+    .getElementById(
+      "topic"
+    )
+    .focus();
+
+  }
+
+);
+
 </script>
+
 </body>
+
 </html>
