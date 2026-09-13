@@ -1,66 +1,95 @@
-import express from "express";
-import dotenv from "dotenv";
-import OpenAI from "openai";
-import path from "path";
-import { fileURLToPath } from "url";
-
-dotenv.config();
+require("dotenv").config();
+const express = require("express");
+const path = require("path");
+const OpenAI = require("openai");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
 
 app.use(express.json({ limit: "2mb" }));
+app.use(express.static(__dirname));
 
-const textModeInstructions = {
-  visualise:
-    "Help a secondary-school student visualise the topic with a clear labelled educational diagram description and explanation.",
+function cleanTopic(topic) {
+  return String(topic || "").trim().slice(0, 500);
+}
 
-  teachme:
-    "Teach the topic step by step for a secondary-school student. Start simple, give an example, and finish with a recap.",
+function safeJsonParse(text) {
+  try {
+    return JSON.parse(text);
+  } catch (_) {
+    const first = text.indexOf("{");
+    const last = text.lastIndexOf("}");
 
-  quiz:
-    "Create a secondary-school quiz with a mixture of questions and a separate answer section at the end.",
+    if (first >= 0 && last > first) {
+      return JSON.parse(text.slice(first, last + 1));
+    }
 
-  flashcard:
-    "Create useful revision flashcards in Question / Answer format. Keep answers concise and accurate.",
+    throw new Error("Model returned invalid JSON");
+  }
+}
 
-  notes:
-    "Create well-organised revision notes with headings, key facts, definitions, examples, and a short summary."
-};
+async function generateJson(system, user) {
+  const result = await client.chat.completions.create({
+    model: "gpt-4o-mini",
+    response_format: { type: "json_object" },
+    temperature: 0.5,
+    messages: [
+      { role: "system", content: system },
+      { role: "user", content: user }
+    ]
+  });
+
+  return safeJsonParse(
+    result.choices?.[0]?.message?.content || "{}"
+  );
+}
+
+async function generateImage(prompt) {
+  const imageResult = await client.images.generate({
+    model: "gpt-image-2",
+    prompt: prompt,
+    size: "1024x1536"
+  });
+
+  const item = imageResult.data?.[0];
+
+  if (!item) {
+    throw new Error("No image returned");
+  }
+
+  if (item.b64_json) {
+    return `data:image/png;base64,${item.b64_json}`;
+  }
+
+  if (item.url) {
+    return item.url;
+  }
+
+  throw new Error("Image response did not include image data");
+}
 
 app.post("/api/generate", async (req, res) => {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      return res.status(500).json({
-        error: "OPENAI_API_KEY is not configured."
-      });
-    }
+    const mode = String(req.body?.mode || "").toLowerCase();
+    const topic = cleanTopic(req.body?.topic);
 
-    const { mode, topic } = req.body || {};
-    const cleanTopic = String(topic || "").trim();
-
-    if (!cleanTopic) {
+    if (!topic) {
       return res.status(400).json({
         error: "Please enter a topic."
       });
     }
 
-    const client = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
-
-    // ---------------------------------
-    // HANDWRITTEN MODE = IMAGE
-    // ---------------------------------
+    // =====================================================
+    // HANDWRITTEN
+    // =====================================================
 
     if (mode === "handwritten") {
-      const imagePrompt = `
-Create a beautiful educational handwritten notebook page about:
-
-"${cleanTopic}"
+      const prompt = `
+Create a beautiful educational handwritten notebook page about "${topic}".
 
 STYLE:
 - Genuine handwritten student revision notes
@@ -75,7 +104,6 @@ STYLE:
 - NOT a typed document
 - NOT a PowerPoint slide
 - NOT a digital infographic
-- The writing must look handwritten
 - Show the notebook page only
 - Do not show hands, desks, pens or people
 
@@ -88,115 +116,315 @@ CONTENT:
 - Helpful labelled sketch or diagram when relevant
 - One memorable summary or exam tip
 
-Keep the amount of text moderate so that it stays readable.
+Keep the amount of text moderate so it remains readable.
+
 Make the educational content accurate and suitable for a secondary-school student.
 `;
 
-      const imageResult = await client.images.generate({
-        model: "gpt-image-2",
-        prompt: imagePrompt,
-        size: "1024x1536"
-      });
+      const image = await generateImage(prompt);
 
-      const generatedImage = imageResult.data?.[0];
-
-      if (!generatedImage) {
-        return res.status(500).json({
-          error: "No image was generated."
-        });
-      }
-
-      // Some image API responses return base64.
-      if (generatedImage.b64_json) {
-        return res.json({
-          type: "image",
-          image: `data:image/png;base64,${generatedImage.b64_json}`
-        });
-      }
-
-      // Fallback if API returns a URL.
-      if (generatedImage.url) {
-        return res.json({
-          type: "image",
-          image: generatedImage.url
-        });
-      }
-
-      return res.status(500).json({
-        error: "Image generation returned no usable image."
+      return res.json({
+        type: "image",
+        mode: "handwritten",
+        image: image
       });
     }
 
-    // ---------------------------------
-    // OTHER MODES = TEXT
-    // ---------------------------------
+    // =====================================================
+    // VISUALISE
+    // =====================================================
 
-    const instruction =
-      textModeInstructions[mode] ||
-      textModeInstructions.teachme;
+    if (mode === "visualise" || mode === "visualize") {
+      const prompt = `
+Create a clear educational visual explanation of "${topic}".
 
-    const completion = await client.chat.completions.create({
-      model: "gpt-4o-mini",
+TARGET:
+Secondary-school learner.
 
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are AI Learning Hub, a safe, accurate and engaging educational assistant for secondary-school students."
-        },
+STYLE:
+- Clean educational illustration
+- Strong visual hierarchy
+- Labelled diagrams
+- Arrows showing relationships
+- Simple educational icons and shapes
+- Minimal but useful text
+- Easy to understand at a glance
+- Portrait composition
+- Modern educational graphic
+- Visually engaging
+- NOT a notebook page
+- NOT a long text document
+- Avoid decorative clutter
 
-        {
-          role: "user",
-          content:
-            `${instruction}
+CONTENT:
+- Clear title
+- Main concept represented visually
+- Important parts labelled
+- Relationships or processes shown using arrows
+- Small supporting explanations
+- One short takeaway at the bottom
 
-Topic or request:
+Prioritise educational accuracy and visual understanding.
+`;
 
-${cleanTopic}`
-        }
+      const image = await generateImage(prompt);
+
+      return res.json({
+        type: "image",
+        mode: "visualise",
+        image: image
+      });
+    }
+
+    // =====================================================
+    // QUIZ
+    // =====================================================
+
+    if (mode === "quiz") {
+      const data = await generateJson(
+        `
+You create accurate educational multiple-choice quizzes
+for secondary-school learners.
+
+Return ONLY valid JSON.
+
+Use this exact structure:
+
+{
+  "title": "Quiz title",
+  "questions": [
+    {
+      "question": "Question text",
+      "options": [
+        "Option A",
+        "Option B",
+        "Option C",
+        "Option D"
+      ],
+      "correctIndex": 0,
+      "explanation": "Short explanation"
+    }
+  ]
+}
+
+RULES:
+
+- Exactly 5 questions.
+- Exactly 4 options for every question.
+- Exactly ONE correct answer.
+- correctIndex must be 0, 1, 2 or 3.
+- Questions must be factually accurate.
+- Wrong answers should be plausible.
+- Explanation should help the learner understand.
+- Do not use markdown.
+`,
+        `Create a five-question quiz about "${topic}".`
+      );
+
+      return res.json({
+        type: "quiz",
+        mode: "quiz",
+        ...data
+      });
+    }
+
+    // =====================================================
+    // FLASHCARDS
+    // =====================================================
+
+    if (mode === "flashcard") {
+      const data = await generateJson(
+        `
+You create educational revision flashcards.
+
+Return ONLY valid JSON.
+
+Use this exact structure:
+
+{
+  "title": "Flashcard title",
+  "cards": [
+    {
+      "front": "Question, term or prompt",
+      "back": "Answer or explanation"
+    }
+  ]
+}
+
+RULES:
+
+- Exactly 8 flashcards.
+- Front should contain a useful question, term or prompt.
+- Back should contain a concise answer.
+- Cards should cover different important aspects of the topic.
+- Avoid duplicate cards.
+- Suitable for secondary-school revision.
+- Do not use markdown.
+`,
+        `Create eight useful flashcards about "${topic}".`
+      );
+
+      return res.json({
+        type: "flashcards",
+        mode: "flashcard",
+        ...data
+      });
+    }
+
+    // =====================================================
+    // TEACH ME
+    // =====================================================
+
+    if (mode === "teachme") {
+      const data = await generateJson(
+        `
+You are a patient expert tutor for secondary-school learners.
+
+Return ONLY valid JSON.
+
+Use this exact structure:
+
+{
+  "title": "Lesson title",
+
+  "overview":
+    "Short simple introduction",
+
+  "sections": [
+    {
+      "heading": "Section heading",
+      "content": "Clear explanation"
+    }
+  ],
+
+  "example": {
+    "heading": "Example",
+    "content": "Helpful example"
+  },
+
+  "checkQuestion":
+    "Question to check understanding",
+
+  "answer":
+    "Answer to the check question",
+
+  "recap": [
+    "Important point",
+    "Important point",
+    "Important point"
+  ]
+}
+
+RULES:
+
+- Use 3 to 5 teaching sections.
+- Start simple.
+- Build understanding step by step.
+- Explain unfamiliar terminology.
+- Include an example.
+- Include a check-your-understanding question.
+- Finish with a short recap.
+- Keep language clear.
+- Do not use markdown.
+`,
+        `Teach me "${topic}" clearly and step by step.`
+      );
+
+      return res.json({
+        type: "lesson",
+        mode: "teachme",
+        ...data
+      });
+    }
+
+    // =====================================================
+    // NOTES
+    // =====================================================
+
+    if (mode === "notes") {
+      const data = await generateJson(
+        `
+You create high-quality revision notes
+for secondary-school learners.
+
+Return ONLY valid JSON.
+
+Use this exact structure:
+
+{
+  "title": "Revision notes title",
+
+  "summary":
+    "Short summary",
+
+  "sections": [
+    {
+      "heading": "Heading",
+      "bullets": [
+        "Important point",
+        "Important point"
       ]
-    });
+    }
+  ],
 
-    res.json({
-      type: "text",
+  "keywords": [
+    {
+      "term": "Keyword",
+      "meaning": "Simple meaning"
+    }
+  ],
 
-      text:
-        completion.choices?.[0]?.message?.content ||
-        "No response was generated."
+  "examTips": [
+    "Exam tip"
+  ]
+}
+
+RULES:
+
+- 3 to 5 sections.
+- 3 to 5 bullet points per section.
+- 4 to 8 important keywords.
+- 2 to 4 exam tips.
+- Clear and concise.
+- Accurate educational information.
+- Do not use markdown.
+`,
+        `Create high-quality revision notes about "${topic}".`
+      );
+
+      return res.json({
+        type: "notes",
+        mode: "notes",
+        ...data
+      });
+    }
+
+    return res.status(400).json({
+      error: "Unknown learning mode."
     });
 
   } catch (error) {
+    console.error("Generation error:", error);
 
-    console.error(error);
+    const message =
+      error?.error?.message ||
+      error?.message ||
+      "Something went wrong while generating the result.";
 
     res.status(500).json({
-      error:
-        error?.message ||
-        "Something went wrong while generating the response."
+      error: message
     });
   }
 });
 
-app.get("/", (req, res) => {
-
+app.get("*", (req, res) => {
   res.sendFile(
     path.join(__dirname, "index.html")
   );
-
 });
 
-app.use(
-  express.static(__dirname)
-);
-
-app.listen(
-  PORT,
-  "0.0.0.0",
-  () => {
-
-    console.log(
-      `AI Learning Switchboard running on port ${PORT}`
-    );
-
-  }
-);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(
+    `AI Learning Switchboard running on port ${PORT}`
+  );
+});
