@@ -1,15 +1,14 @@
-<!DOCTYPE html>
+<!doctype html>
 
 <html lang="en">
 
 <head>
 
-<meta charset="UTF-8">
+<meta charset="utf-8">
 
 <meta
   name="viewport"
-  content="width=device-width, initial-scale=1.0"
->
+  content="width=device-width,initial-scale=1">
 
 <title>
 AI Learning Switchboard
@@ -17,764 +16,814 @@ AI Learning Switchboard
 
 <style>
 
-* {
-  box-sizing: border-box;
-}
-
 :root {
 
-  --ink: #24324a;
+  --bg: #f7f8fc;
+  --card: #ffffff;
+  --text: #1e2430;
+  --muted: #667085;
+  --line: #e7eaf0;
 
-  --muted: #64748b;
+  --accent: #4f46e5;
+  --accent-light: #eef2ff;
 
-  --shadow:
-    0 12px 35px
-    rgba(36,50,74,.13);
+  --good: #067647;
+  --bad: #b42318;
 
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
 
   margin: 0;
 
-  min-height: 100vh;
-
   font-family:
-    Inter,
-    ui-rounded,
-    "SF Pro Rounded",
-    Arial,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
     sans-serif;
 
-  color: var(--ink);
+  background: var(--bg);
+  color: var(--text);
 
-  background:
-
-    radial-gradient(
-      circle at 10% 10%,
-      #ffd6f6 0 10%,
-      transparent 28%
-    ),
-
-    radial-gradient(
-      circle at 90% 15%,
-      #c9f5ff 0 10%,
-      transparent 28%
-    ),
-
-    radial-gradient(
-      circle at 80% 90%,
-      #fff0b8 0 10%,
-      transparent 28%
-    ),
-
-    linear-gradient(
-      135deg,
-      #f7f5ff,
-      #eafcff 50%,
-      #fff7f1
-    );
-
-  padding: 24px;
 }
 
-.wrap {
+.shell {
 
   max-width: 1100px;
-
   margin: auto;
+  padding: 24px;
 
 }
 
-header {
-
-  text-align: center;
+.hero {
 
   padding:
-    22px
-    15px
+    18px 0
     10px;
 
 }
 
-.logo {
+.hero h1 {
 
-  display: inline-flex;
+  font-size:
+    clamp(
+      28px,
+      5vw,
+      44px
+    );
 
-  align-items: center;
+  margin:
+    0 0 8px;
+
+}
+
+.hero p {
+
+  color: var(--muted);
+  margin: 0;
+
+}
+
+/* SWITCHES */
+
+.modes {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+
+  gap: 12px;
+
+  margin:
+    22px 0;
+
+}
+
+.mode {
+
+  background: white;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius: 18px;
+
+  padding: 16px;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    0.18s;
+
+}
+
+.mode:hover {
+
+  transform:
+    translateY(-1px);
+
+  box-shadow:
+    0 8px 24px
+    rgba(
+      16,
+      24,
+      40,
+      0.08
+    );
+
+}
+
+.mode.active {
+
+  border-color:
+    var(--accent);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(
+      79,
+      70,
+      229,
+      0.10
+    );
+
+}
+
+.icon {
+
+  font-size: 25px;
+
+}
+
+.mode b {
+
+  display: block;
+
+  margin-top: 7px;
+
+}
+
+.mode small {
+
+  display: block;
+
+  color:
+    var(--muted);
+
+  margin-top: 4px;
+
+  line-height: 1.35;
+
+}
+
+/* INPUT */
+
+.compose {
+
+  display: flex;
 
   gap: 10px;
 
   background: white;
 
-  padding:
-    10px
-    18px;
-
-  border-radius: 999px;
-
-  box-shadow:
-    var(--shadow);
-
-  font-weight: 800;
-
-}
-
-h1 {
-
-  margin:
-    18px
-    0
-    8px;
-
-  font-size:
-    clamp(
-      2rem,
-      5vw,
-      3.5rem
-    );
-
-}
-
-.gradient-text {
-
-  background:
-    linear-gradient(
-      90deg,
-      #ff5f8f,
-      #8b5cf6,
-      #06b6d4,
-      #22c55e
-    );
-
-  -webkit-background-clip:
-    text;
-
-  background-clip:
-    text;
-
-  color:
-    transparent;
-
-}
-
-.subtitle {
-
-  color:
-    var(--muted);
-
-  font-size:
-    1.05rem;
-
-  margin:
-    0 auto;
-
-  max-width:
-    700px;
-
-}
-
-.panel {
-
-  background:
-    rgba(
-      255,
-      255,
-      255,
-      .84
-    );
-
-  backdrop-filter:
-    blur(12px);
-
   border:
     1px solid
-    rgba(
-      255,
-      255,
-      255,
-      .9
-    );
+    var(--line);
 
-  border-radius:
-    28px;
+  padding: 10px;
 
-  box-shadow:
-    var(--shadow);
+  border-radius: 18px;
+
+  position: sticky;
+
+  top: 8px;
+
+  z-index: 10;
+
+}
+
+input {
+
+  flex: 1;
+
+  border: 0;
+
+  outline: none;
+
+  font-size: 16px;
+
+  padding: 10px;
+
+  background:
+    transparent;
+
+  min-width: 0;
+
+}
+
+button {
+
+  border: 0;
+
+  border-radius: 12px;
 
   padding:
-    24px;
+    11px 16px;
 
-  margin-top:
-    24px;
+  font-weight: 700;
 
-}
-
-.section-title {
-
-  font-size:
-    1.15rem;
-
-  font-weight:
-    800;
-
-  margin:
-    0 0 16px;
+  cursor: pointer;
 
 }
 
-.switches {
+.primary {
 
-  display:
-    grid;
+  background:
+    var(--accent);
 
-  grid-template-columns:
-    repeat(
-      3,
-      1fr
-    );
-
-  gap:
-    14px;
+  color: white;
 
 }
 
-.switch {
+.secondary {
 
-  border:
-    0;
-
-  cursor:
-    pointer;
-
-  text-align:
-    left;
-
-  padding:
-    18px;
-
-  border-radius:
-    22px;
+  background:
+    #f2f4f7;
 
   color:
-    var(--ink);
-
-  background:
-    white;
-
-  box-shadow:
-    0 7px 20px
-    rgba(
-      36,
-      50,
-      74,
-      .08
-    );
-
-  transition:
-    .2s transform,
-    .2s box-shadow,
-    .2s outline;
-
-  min-height:
-    118px;
-
-}
-
-.switch:hover {
-
-  transform:
-    translateY(-3px);
-
-}
-
-.switch.active {
-
-  outline:
-    4px solid
-    rgba(
-      37,
-      99,
-      235,
-      .35
-    );
-
-  transform:
-    translateY(-2px);
-
-}
-
-.switch .emoji {
-
-  font-size:
-    2rem;
-
-  display:
-    block;
-
-  margin-bottom:
-    8px;
-
-}
-
-.switch strong {
-
-  display:
-    block;
-
-  font-size:
-    1.05rem;
-
-}
-
-.switch small {
-
-  display:
-    block;
-
-  color:
-    var(--muted);
-
-  margin-top:
-    5px;
-
-  line-height:
-    1.35;
-
-}
-
-.hand {
-
-  background:
-    linear-gradient(
-      135deg,
-      #ffe0ec,
-      #fff
-    );
-
-}
-
-.visual {
-
-  background:
-    linear-gradient(
-      135deg,
-      #d9f7ff,
-      #fff
-    );
-
-}
-
-.teach {
-
-  background:
-    linear-gradient(
-      135deg,
-      #e5ddff,
-      #fff
-    );
-
-}
-
-.quiz {
-
-  background:
-    linear-gradient(
-      135deg,
-      #fff1b8,
-      #fff
-    );
-
-}
-
-.flash {
-
-  background:
-    linear-gradient(
-      135deg,
-      #d8f9e5,
-      #fff
-    );
-
-}
-
-.notes {
-
-  background:
-    linear-gradient(
-      135deg,
-      #ffe5cc,
-      #fff
-    );
-
-}
-
-label {
-
-  display:
-    block;
-
-  font-weight:
-    800;
-
-  margin:
-    22px 0 9px;
-
-}
-
-textarea {
-
-  width:
-    100%;
-
-  min-height:
-    105px;
-
-  resize:
-    vertical;
-
-  border:
-    2px solid #e5e7eb;
-
-  border-radius:
-    18px;
-
-  padding:
-    16px;
-
-  font:
-    inherit;
-
-  font-size:
-    1rem;
-
-  outline:
-    none;
-
-}
-
-textarea:focus {
-
-  border-color:
-    #8b5cf6;
-
-  box-shadow:
-    0 0 0 4px
-    rgba(
-      139,
-      92,
-      246,
-      .12
-    );
-
-}
-
-.hint {
-
-  color:
-    var(--muted);
-
-  font-size:
-    .9rem;
-
-  margin-top:
-    8px;
-
-}
-
-.actions {
-
-  display:
-    flex;
-
-  gap:
-    12px;
-
-  flex-wrap:
-    wrap;
-
-  margin-top:
-    16px;
-
-}
-
-.generate,
-.clear {
-
-  border:
-    0;
-
-  cursor:
-    pointer;
-
-  padding:
-    14px 20px;
-
-  border-radius:
-    15px;
-
-  font-weight:
-    800;
-
-  font-size:
-    1rem;
-
-}
-
-.generate {
-
-  color:
-    white;
-
-  background:
-    linear-gradient(
-      90deg,
-      #ff5f8f,
-      #8b5cf6,
-      #06b6d4
-    );
-
-  box-shadow:
-    0 10px 22px
-    rgba(
-      139,
-      92,
-      246,
-      .25
-    );
-
-}
-
-.generate:disabled {
-
-  opacity:
-    .6;
-
-  cursor:
-    not-allowed;
-
-}
-
-.clear {
-
-  background:
-    #eef2f7;
-
-  color:
-    var(--ink);
+    #344054;
 
 }
 
 .result {
 
-  margin-top:
-    24px;
+  margin-top: 20px;
 
-  display:
-    none;
+  min-height: 100px;
 
 }
 
-.result.show {
+.panel {
 
-  display:
-    block;
+  background: white;
 
-}
+  border:
+    1px solid
+    var(--line);
 
-.result-card {
+  border-radius: 20px;
 
-  background:
-    #fff;
+  padding: 20px;
 
-  border-radius:
-    24px;
-
-  padding:
-    24px;
-
-  box-shadow:
-    var(--shadow);
-
-  border-left:
-    8px solid
-    #8b5cf6;
+  margin-bottom: 14px;
 
 }
 
-.result-head {
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  gap:
-    12px;
-
-  margin-bottom:
-    16px;
-
-}
-
-.result-head h2 {
-
-  margin:
-    0;
-
-  font-size:
-    1.35rem;
-
-}
-
-.badge {
-
-  background:
-    #eef2ff;
-
-  padding:
-    7px 11px;
-
-  border-radius:
-    999px;
-
-  font-size:
-    .85rem;
-
-  font-weight:
-    800;
-
-}
-
-.content {
-
-  line-height:
-    1.65;
-
-}
-
-.generated-image {
-
-  width:
-    100%;
-
-  max-width:
-    760px;
-
-  height:
-    auto;
-
-  display:
-    block;
-
-  margin:
-    0 auto;
-
-  border-radius:
-    20px;
-
-  box-shadow:
-    0 10px 28px
-    rgba(
-      36,
-      50,
-      74,
-      .16
-    );
-
-}
+/* LOADING */
 
 .loading {
 
-  padding:
-    18px;
+  display: flex;
 
-  border-radius:
-    16px;
+  align-items: center;
 
-  background:
-    #f8fafc;
-
-  color:
-    #475569;
-
-}
-
-.error {
-
-  padding:
-    16px;
-
-  border-radius:
-    16px;
-
-  background:
-    #fff1f2;
-
-  color:
-    #9f1239;
-
-}
-
-footer {
-
-  text-align:
-    center;
+  gap: 10px;
 
   color:
     var(--muted);
 
-  padding:
-    28px 8px 8px;
+}
 
-  font-size:
-    .9rem;
+.spinner {
+
+  width: 18px;
+  height: 18px;
+
+  border:
+    2px solid #ddd;
+
+  border-top-color:
+    var(--accent);
+
+  border-radius: 50%;
+
+  animation:
+    spin 0.8s
+    linear infinite;
 
 }
 
-@media (
-  max-width:
-  700px
-) {
+@keyframes spin {
 
-  body {
-
-    padding:
-      14px;
-
+  to {
+    transform:
+      rotate(360deg);
   }
 
-  .panel {
+}
 
-    padding:
-      16px;
+/* IMAGES */
 
-    border-radius:
-      22px;
+.generated-image {
 
-  }
+  display: block;
 
-  .switches {
+  width: 100%;
+
+  max-width: 760px;
+
+  margin:
+    0 auto;
+
+  border-radius: 20px;
+
+  box-shadow:
+    0 10px 35px
+    rgba(
+      16,
+      24,
+      40,
+      0.14
+    );
+
+}
+
+/* QUIZ */
+
+.quiz-question {
+
+  margin-bottom: 25px;
+
+}
+
+.quiz-question h3 {
+
+  font-size: 17px;
+
+  margin:
+    0 0 12px;
+
+}
+
+.option {
+
+  display: flex;
+
+  gap: 10px;
+
+  align-items:
+    flex-start;
+
+  width: 100%;
+
+  text-align: left;
+
+  border:
+    1px solid
+    var(--line);
+
+  background: white;
+
+  margin:
+    8px 0;
+
+  padding: 13px;
+
+  border-radius: 12px;
+
+  font-weight: 500;
+
+}
+
+.option:hover {
+
+  background:
+    #fafaff;
+
+}
+
+.option.selected {
+
+  border-color:
+    var(--accent);
+
+  background:
+    var(--accent-light);
+
+}
+
+.option.correct {
+
+  border-color:
+    #12b76a;
+
+  background:
+    #ecfdf3;
+
+}
+
+.option.wrong {
+
+  border-color:
+    #f04438;
+
+  background:
+    #fef3f2;
+
+}
+
+.feedback {
+
+  font-size: 14px;
+
+  margin-top: 9px;
+
+  padding: 10px;
+
+  border-radius: 10px;
+
+  background:
+    #f9fafb;
+
+  color:
+    #475467;
+
+}
+
+.quiz-actions {
+
+  display: flex;
+
+  gap: 10px;
+
+  flex-wrap: wrap;
+
+}
+
+.score {
+
+  font-weight: 800;
+
+  margin:
+    15px 0;
+
+  color:
+    var(--accent);
+
+}
+
+/* FLASHCARDS */
+
+.flash-wrap {
+
+  text-align: center;
+
+}
+
+.flashcard {
+
+  max-width: 650px;
+
+  height: 330px;
+
+  margin:
+    10px auto
+    20px;
+
+  perspective:
+    1000px;
+
+  cursor: pointer;
+
+}
+
+.flash-inner {
+
+  position:
+    relative;
+
+  width: 100%;
+  height: 100%;
+
+  transition:
+    transform 0.5s;
+
+  transform-style:
+    preserve-3d;
+
+}
+
+.flashcard.flipped
+.flash-inner {
+
+  transform:
+    rotateY(180deg);
+
+}
+
+.flash-face {
+
+  position:
+    absolute;
+
+  inset: 0;
+
+  backface-visibility:
+    hidden;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:
+    24px;
+
+  background:
+    white;
+
+  display: flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  padding: 36px;
+
+  box-shadow:
+    0 10px 30px
+    rgba(
+      16,
+      24,
+      40,
+      0.08
+    );
+
+  font-size:
+    clamp(
+      22px,
+      4vw,
+      32px
+    );
+
+  font-weight: 800;
+
+}
+
+.flash-back {
+
+  transform:
+    rotateY(180deg);
+
+  background:
+    #f7f5ff;
+
+  font-size:
+    clamp(
+      18px,
+      3vw,
+      25px
+    );
+
+  font-weight: 650;
+
+}
+
+.flash-controls {
+
+  display: flex;
+
+  justify-content:
+    center;
+
+  align-items:
+    center;
+
+  gap: 10px;
+
+  flex-wrap: wrap;
+
+}
+
+.counter {
+
+  color:
+    var(--muted);
+
+  min-width:
+    80px;
+
+}
+
+/* TEACH ME */
+
+.lesson-section {
+
+  padding:
+    14px 0;
+
+  border-top:
+    1px solid
+    var(--line);
+
+}
+
+.callout {
+
+  background:
+    #f7f5ff;
+
+  border-left:
+    4px solid
+    var(--accent);
+
+  padding:
+    14px 16px;
+
+  border-radius:
+    10px;
+
+  margin-top:
+    14px;
+
+}
+
+.recap {
+
+  display: grid;
+
+  gap: 8px;
+
+}
+
+.recap div {
+
+  background:
+    #f9fafb;
+
+  padding:
+    10px 12px;
+
+  border-radius:
+    10px;
+
+}
+
+/* NOTES */
+
+.notes-section {
+
+  padding:
+    14px 0;
+
+  border-top:
+    1px solid
+    var(--line);
+
+}
+
+.keywords {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+  gap: 10px;
+
+}
+
+.keyword {
+
+  background:
+    #f9fafb;
+
+  border:
+    1px solid
+    var(--line);
+
+  padding: 12px;
+
+  border-radius:
+    12px;
+
+}
+
+.keyword b {
+
+  display: block;
+
+  margin-bottom: 4px;
+
+}
+
+.tip {
+
+  background:
+    #fff7ed;
+
+  border:
+    1px solid
+    #fed7aa;
+
+  padding:
+    11px 13px;
+
+  border-radius:
+    12px;
+
+  margin:
+    8px 0;
+
+}
+
+/* ERROR */
+
+.error {
+
+  background:
+    #fff1f0;
+
+  border:
+    1px solid
+    #fecdca;
+
+  color:
+    #b42318;
+
+  padding: 14px;
+
+  border-radius: 14px;
+
+}
+
+/* MOBILE */
+
+@media
+(max-width: 760px) {
+
+  .modes {
 
     grid-template-columns:
       repeat(
         2,
-        1fr
+        minmax(0, 1fr)
       );
-
-    gap:
-      10px;
 
   }
 
-  .switch {
+  .compose {
 
-    min-height:
-      110px;
+    flex-wrap:
+      wrap;
 
-    padding:
-      14px;
+  }
+
+  .compose input {
+
+    flex-basis:
+      100%;
+
+  }
+
+  .compose button {
+
+    flex: 1;
+
+  }
+
+  .keywords {
+
+    grid-template-columns:
+      1fr;
+
+  }
+
+  .shell {
+
+    padding: 16px;
+
+  }
+
+  .flashcard {
+
+    height:
+      290px;
 
   }
 
@@ -786,205 +835,135 @@ footer {
 
 <body>
 
-<div class="wrap">
+<div class="shell">
 
-<header>
-
-<div class="logo">
-
-🌟
-
-<span>
-AI LEARNING HUB
-</span>
-
-</div>
+<div class="hero">
 
 <h1>
-
-<span class="gradient-text">
-
-Learn. Explore. Create.
-
-</span>
-
+AI Learning Switchboard
 </h1>
 
-<p class="subtitle">
-
-Choose a learning switch,
-type your topic and generate
-a personalised learning activity.
-
+<p>
+Choose a learning mode.
+Each switch uses its own native experience.
 </p>
 
-</header>
+</div>
 
-<main class="panel">
 
-<p class="section-title">
-
-🎛️ Choose your learning switch
-
-</p>
-
-<div class="switches">
+<div
+  class="modes"
+  id="modes">
 
 <button
-  class="switch hand active"
-  data-mode="handwritten"
->
+  class="mode active"
+  data-mode="handwritten">
 
-<span class="emoji">
-
+<span class="icon">
 ✍️
-
 </span>
 
-<strong>
-
+<b>
 /handwritten
-
-</strong>
+</b>
 
 <small>
-
-Generate a real
-handwritten notebook-style image
-
+Handwritten notebook image
 </small>
 
 </button>
 
 
 <button
-  class="switch visual"
-  data-mode="visualise"
->
+  class="mode"
+  data-mode="visualise">
 
-<span class="emoji">
-
+<span class="icon">
 👁️
-
 </span>
 
-<strong>
-
+<b>
 /visualise
-
-</strong>
+</b>
 
 <small>
-
-Imagine and understand
-step by step
-
+Educational visual explanation
 </small>
 
 </button>
 
 
 <button
-  class="switch teach"
-  data-mode="teachme"
->
+  class="mode"
+  data-mode="teachme">
 
-<span class="emoji">
-
+<span class="icon">
 🎓
-
 </span>
 
-<strong>
-
+<b>
 /teachme
-
-</strong>
+</b>
 
 <small>
-
-A friendly teacher
-explains the topic
-
+Structured tutoring lesson
 </small>
 
 </button>
 
 
 <button
-  class="switch quiz"
-  data-mode="quiz"
->
+  class="mode"
+  data-mode="quiz">
 
-<span class="emoji">
-
+<span class="icon">
 ❓
-
 </span>
 
-<strong>
-
+<b>
 /quiz
-
-</strong>
+</b>
 
 <small>
-
-Test your knowledge
-
+Interactive multiple-choice quiz
 </small>
 
 </button>
 
 
 <button
-  class="switch flash"
-  data-mode="flashcard"
->
+  class="mode"
+  data-mode="flashcard">
 
-<span class="emoji">
-
+<span class="icon">
 🃏
-
 </span>
 
-<strong>
-
+<b>
 /flashcard
-
-</strong>
+</b>
 
 <small>
-
-Quick revision cards
-
+Tap-to-flip study cards
 </small>
 
 </button>
 
 
 <button
-  class="switch notes"
-  data-mode="notes"
->
+  class="mode"
+  data-mode="notes">
 
-<span class="emoji">
-
+<span class="icon">
 📝
-
 </span>
 
-<strong>
-
+<b>
 /notes
-
-</strong>
+</b>
 
 <small>
-
-Important points
-and key facts
-
+Structured revision notes
 </small>
 
 </button>
@@ -992,45 +971,23 @@ and key facts
 </div>
 
 
-<label for="topic">
+<div class="compose">
 
-🧠 What do you want to learn?
-
-</label>
-
-
-<textarea
+<input
   id="topic"
-  placeholder="Try: Mitochondria, Human Heart, Photosynthesis..."
-></textarea>
-
-
-<div class="hint">
-
-For /handwritten,
-the result will be an actual
-AI-generated handwritten
-notebook image.
-
-</div>
-
-
-<div class="actions">
+  placeholder="Enter a topic, e.g. mitochondria">
 
 <button
-  class="generate"
-  id="generate"
->
+  class="primary"
+  id="generate">
 
-🚀 Generate Learning
+Generate
 
 </button>
 
-
 <button
-  class="clear"
-  id="clear"
->
+  class="secondary"
+  id="clear">
 
 Clear
 
@@ -1038,522 +995,83 @@ Clear
 
 </div>
 
-</main>
-
-
-<section
-  class="result"
-  id="result"
->
-
-<div class="result-card">
-
-<div class="result-head">
-
-<span
-  style="font-size:2rem"
-  id="resultEmoji"
->
-
-✍️
-
-</span>
-
-<div>
-
-<h2 id="resultTitle">
-
-Your Learning Result
-
-</h2>
-
-<span
-  class="badge"
-  id="modeBadge"
->
-
-/handwritten
-
-</span>
-
-</div>
-
-</div>
 
 <div
-  class="content"
-  id="content"
-></div>
-
+  class="result"
+  id="result">
 </div>
-
-</section>
-
-
-<footer>
-
-Made for curious
-secondary students 🚀📚
-
-</footer>
 
 </div>
 
 
 <script>
 
-const modes = {
-
-  handwritten: {
-
-    emoji:
-      "✍️",
-
-    title:
-      "Handwritten Notebook",
-
-    tag:
-      "/handwritten"
-
-  },
-
-  visualise: {
-
-    emoji:
-      "👁️",
-
-    title:
-      "Visual Learning Journey",
-
-    tag:
-      "/visualise"
-
-  },
-
-  teachme: {
-
-    emoji:
-      "🎓",
-
-    title:
-      "Teach Me",
-
-    tag:
-      "/teachme"
-
-  },
-
-  quiz: {
-
-    emoji:
-      "❓",
-
-    title:
-      "Knowledge Quiz",
-
-    tag:
-      "/quiz"
-
-  },
-
-  flashcard: {
-
-    emoji:
-      "🃏",
-
-    title:
-      "Revision Flashcards",
-
-    tag:
-      "/flashcard"
-
-  },
-
-  notes: {
-
-    emoji:
-      "📝",
-
-    title:
-      "Smart Study Notes",
-
-    tag:
-      "/notes"
-
-  }
-
-};
-
-
-let selected =
+let mode =
   "handwritten";
 
-
-const switches =
+const modes =
   document.querySelectorAll(
-    ".switch"
+    ".mode"
+  );
+
+const topic =
+  document.getElementById(
+    "topic"
+  );
+
+const result =
+  document.getElementById(
+    "result"
+  );
+
+const generate =
+  document.getElementById(
+    "generate"
   );
 
 
-switches.forEach(
+modes.forEach(
+  button => {
 
-  btn =>
-
-    btn.addEventListener(
-
+    button.addEventListener(
       "click",
-
       () => {
 
-        selected =
-          btn.dataset.mode;
-
-        switches.forEach(
-
-          b =>
-
-            b.classList.remove(
+        modes.forEach(
+          item =>
+            item.classList.remove(
               "active"
             )
-
         );
 
-        btn.classList.add(
+        button.classList.add(
           "active"
         );
 
+        mode =
+          button.dataset.mode;
+
       }
+    );
 
-    )
-
+  }
 );
 
 
-function escapeHtml(
-  value
-) {
-
-  const div =
-    document.createElement(
-      "div"
-    );
-
-  div.textContent =
-    value;
-
-  return div.innerHTML;
-
-}
-
-
-function simpleMarkdown(
-  text
-) {
-
-  return escapeHtml(
-    text
-  )
-
-  .replace(
-    /^### (.*$)/gim,
-    "<h3>$1</h3>"
-  )
-
-  .replace(
-    /^## (.*$)/gim,
-    "<h2>$1</h2>"
-  )
-
-  .replace(
-    /^# (.*$)/gim,
-    "<h1>$1</h1>"
-  )
-
-  .replace(
-    /\*\*(.*?)\*\*/gim,
-    "<strong>$1</strong>"
-  )
-
-  .replace(
-    /\n/g,
-    "<br>"
-  );
-
-}
-
-
-document
-.getElementById(
-  "generate"
-)
-.addEventListener(
-
-  "click",
-
-  async () => {
-
-    const topic =
-      document
-      .getElementById(
-        "topic"
-      )
-      .value
-      .trim();
-
-
-    if (!topic) {
-
-      document
-      .getElementById(
-        "topic"
-      )
-      .focus();
-
-      return;
-
-    }
-
-
-    const btn =
-      document
-      .getElementById(
-        "generate"
-      );
-
-
-    const mode =
-      modes[selected];
-
-
-    document
-    .getElementById(
-      "resultEmoji"
-    )
-    .textContent =
-      mode.emoji;
-
-
-    document
-    .getElementById(
-      "resultTitle"
-    )
-    .textContent =
-      mode.title;
-
-
-    document
-    .getElementById(
-      "modeBadge"
-    )
-    .textContent =
-      mode.tag;
-
-
-    document
-    .getElementById(
-      "content"
-    )
-    .innerHTML =
-
-      selected ===
-      "handwritten"
-
-      ?
-
-      `
-      <div class="loading">
-
-      🎨 Creating your
-      handwritten notebook page...
-
-      </div>
-      `
-
-      :
-
-      `
-      <div class="loading">
-
-      🤖 Generating your
-      learning result...
-
-      </div>
-      `;
-
-
-    document
-    .getElementById(
-      "result"
-    )
-    .classList
-    .add(
-      "show"
-    );
-
-
-    btn.disabled =
-      true;
-
-
-    btn.textContent =
-
-      selected ===
-      "handwritten"
-
-      ?
-
-      "🎨 Creating image..."
-
-      :
-
-      "⏳ Generating...";
-
-
-    try {
-
-      const response =
-        await fetch(
-
-          "/api/generate",
-
-          {
-
-            method:
-              "POST",
-
-            headers: {
-
-              "Content-Type":
-                "application/json"
-
-            },
-
-            body:
-              JSON.stringify({
-
-                mode:
-                  selected,
-
-                topic:
-                  topic
-
-              })
-
-          }
-
-        );
-
-
-      const data =
-        await response.json();
-
-
-      if (!response.ok) {
-
-        throw new Error(
-
-          data.error ||
-          "Generation failed."
-
-        );
-
-      }
-
-
-      if (
-        data.type ===
-        "image"
-        &&
-        data.image
-      ) {
-
-        document
-        .getElementById(
-          "content"
-        )
-        .innerHTML =
-
-          `
-          <img
-            class="generated-image"
-            src="${data.image}"
-            alt="Generated handwritten notes"
-          >
-          `;
-
-      }
-
-      else {
-
-        document
-        .getElementById(
-          "content"
-        )
-        .innerHTML =
-          simpleMarkdown(
-            data.text || ""
-          );
-
-      }
-
-
-      document
-      .getElementById(
-        "result"
-      )
-      .scrollIntoView({
-
-        behavior:
-          "smooth",
-
-        block:
-          "start"
-
-      });
-
-
-    }
-
-    catch (
-      error
+topic.addEventListener(
+  "keydown",
+  event => {
+
+    if (
+      event.key ===
+      "Enter"
     ) {
 
-      document
-      .getElementById(
-        "content"
-      )
-      .innerHTML =
-
-        `
-        <div class="error">
-
-        <strong>
-        Generation error:
-        </strong>
-
-        <br>
-
-        ${escapeHtml(
-          error.message
-        )}
-
-        </div>
-        `;
-
-    }
-
-    finally {
-
-      btn.disabled =
-        false;
-
-      btn.textContent =
-        "🚀 Generate Learning";
+      generate.click();
 
     }
 
   }
-
 );
 
 
@@ -1562,38 +1080,1136 @@ document
   "clear"
 )
 .addEventListener(
-
   "click",
-
   () => {
 
-    document
-    .getElementById(
-      "topic"
-    )
-    .value =
+    topic.value = "";
+
+    result.innerHTML =
       "";
 
+    topic.focus();
 
-    document
-    .getElementById(
-      "result"
+  }
+);
+
+
+generate.addEventListener(
+  "click",
+  async () => {
+
+    const value =
+      topic.value.trim();
+
+    if (!value) {
+
+      result.innerHTML =
+        `
+        <div class="error">
+        Please enter a topic first.
+        </div>
+        `;
+
+      return;
+
+    }
+
+    let loadingText =
+      "Building your learning experience...";
+
+    if (
+      mode ===
+      "handwritten"
+      ||
+      mode ===
+      "visualise"
+    ) {
+
+      loadingText =
+        "Creating your visual...";
+
+    }
+
+    result.innerHTML =
+      `
+      <div class="panel loading">
+
+      <span class="spinner">
+      </span>
+
+      ${loadingText}
+
+      </div>
+      `;
+
+    generate.disabled =
+      true;
+
+    try {
+
+      const response =
+        await fetch(
+          "/api/generate",
+          {
+
+            method:
+              "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify({
+                mode: mode,
+                topic: value
+              })
+
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+
+        throw new Error(
+          data.error ||
+          "Generation failed"
+        );
+
+      }
+
+      render(data);
+
+    }
+
+    catch (error) {
+
+      result.innerHTML =
+        `
+        <div class="error">
+        ${escapeHtml(
+          error.message
+        )}
+        </div>
+        `;
+
+    }
+
+    finally {
+
+      generate.disabled =
+        false;
+
+    }
+
+  }
+);
+
+
+function render(data) {
+
+  if (
+    data.type ===
+    "image"
+  ) {
+
+    renderImage(data);
+
+    return;
+
+  }
+
+  if (
+    data.type ===
+    "quiz"
+  ) {
+
+    renderQuiz(data);
+
+    return;
+
+  }
+
+  if (
+    data.type ===
+    "flashcards"
+  ) {
+
+    renderFlashcards(
+      data
+    );
+
+    return;
+
+  }
+
+  if (
+    data.type ===
+    "lesson"
+  ) {
+
+    renderLesson(data);
+
+    return;
+
+  }
+
+  if (
+    data.type ===
+    "notes"
+  ) {
+
+    renderNotes(data);
+
+    return;
+
+  }
+
+  result.innerHTML =
+    `
+    <div class="error">
+    Unsupported response type.
+    </div>
+    `;
+
+}
+
+
+/* IMAGE */
+
+function renderImage(data) {
+
+  result.innerHTML =
+    `
+    <img
+      class="generated-image"
+      src="${data.image}"
+      alt="Generated educational visual">
+    `;
+
+}
+
+
+/* QUIZ */
+
+function renderQuiz(data) {
+
+  const questions =
+    Array.isArray(
+      data.questions
     )
+    ?
+    data.questions
+    :
+    [];
+
+  result.innerHTML =
+    `
+    <div class="panel">
+
+    <h2>
+    ${escapeHtml(
+      data.title ||
+      "Quiz"
+    )}
+    </h2>
+
+    <div id="quizBox">
+    </div>
+
+    <div class="quiz-actions">
+
+    <button
+      class="primary"
+      id="submitQuiz">
+
+    Check answers
+
+    </button>
+
+    <button
+      class="secondary"
+      id="resetQuiz">
+
+    Reset
+
+    </button>
+
+    </div>
+
+    <div id="scoreBox">
+    </div>
+
+    </div>
+    `;
+
+
+  const box =
+    document.getElementById(
+      "quizBox"
+    );
+
+  const selections =
+    {};
+
+
+  questions.forEach(
+    (question, questionIndex) => {
+
+      const wrapper =
+        document.createElement(
+          "div"
+        );
+
+      wrapper.className =
+        "quiz-question";
+
+      wrapper.innerHTML =
+        `
+        <h3>
+        ${questionIndex + 1}.
+        ${escapeHtml(
+          question.question
+        )}
+        </h3>
+        `;
+
+
+      question.options.forEach(
+        (option, optionIndex) => {
+
+          const button =
+            document.createElement(
+              "button"
+            );
+
+          button.className =
+            "option";
+
+          button.innerHTML =
+            `
+            <span>
+            ${String.fromCharCode(
+              65 +
+              optionIndex
+            )}.
+            </span>
+
+            <span>
+            ${escapeHtml(
+              option
+            )}
+            </span>
+            `;
+
+
+          button.onclick =
+            () => {
+
+              selections[
+                questionIndex
+              ] =
+                optionIndex;
+
+              wrapper
+              .querySelectorAll(
+                ".option"
+              )
+              .forEach(
+                item =>
+                  item
+                  .classList
+                  .remove(
+                    "selected"
+                  )
+              );
+
+              button
+              .classList
+              .add(
+                "selected"
+              );
+
+            };
+
+
+          wrapper.appendChild(
+            button
+          );
+
+        }
+      );
+
+
+      const feedback =
+        document.createElement(
+          "div"
+        );
+
+      feedback.className =
+        "feedback";
+
+      feedback.style.display =
+        "none";
+
+      feedback.id =
+        `feedback-${questionIndex}`;
+
+      wrapper.appendChild(
+        feedback
+      );
+
+      box.appendChild(
+        wrapper
+      );
+
+    }
+  );
+
+
+  document
+  .getElementById(
+    "submitQuiz"
+  )
+  .onclick =
+    () => {
+
+      let score =
+        0;
+
+      questions.forEach(
+        (question, questionIndex) => {
+
+          const wrapper =
+            box.children[
+              questionIndex
+            ];
+
+          const options =
+            wrapper
+            .querySelectorAll(
+              ".option"
+            );
+
+
+          options.forEach(
+            (option, optionIndex) => {
+
+              option
+              .classList
+              .remove(
+                "correct",
+                "wrong"
+              );
+
+
+              if (
+                optionIndex ===
+                Number(
+                  question.correctIndex
+                )
+              ) {
+
+                option
+                .classList
+                .add(
+                  "correct"
+                );
+
+              }
+
+
+              if (
+                selections[
+                  questionIndex
+                ] ===
+                optionIndex
+                &&
+                optionIndex !==
+                Number(
+                  question.correctIndex
+                )
+              ) {
+
+                option
+                .classList
+                .add(
+                  "wrong"
+                );
+
+              }
+
+            }
+          );
+
+
+          if (
+            selections[
+              questionIndex
+            ] ===
+            Number(
+              question.correctIndex
+            )
+          ) {
+
+            score++;
+
+          }
+
+
+          const feedback =
+            document.getElementById(
+              `feedback-${questionIndex}`
+            );
+
+          feedback.style.display =
+            "block";
+
+          feedback.textContent =
+            question.explanation ||
+            "";
+
+        }
+      );
+
+
+      document
+      .getElementById(
+        "scoreBox"
+      )
+      .innerHTML =
+        `
+        <div class="score">
+
+        Score:
+        ${score}
+        /
+        ${questions.length}
+
+        </div>
+        `;
+
+    };
+
+
+  document
+  .getElementById(
+    "resetQuiz"
+  )
+  .onclick =
+    () => {
+
+      renderQuiz(data);
+
+    };
+
+}
+
+
+/* FLASHCARDS */
+
+function renderFlashcards(
+  data
+) {
+
+  const cards =
+    Array.isArray(
+      data.cards
+    )
+    ?
+    data.cards
+    :
+    [];
+
+  let index =
+    0;
+
+
+  result.innerHTML =
+    `
+    <div
+      class="panel flash-wrap">
+
+    <h2>
+    ${escapeHtml(
+      data.title ||
+      "Flashcards"
+    )}
+    </h2>
+
+
+    <div
+      class="flashcard"
+      id="flashcard">
+
+    <div
+      class="flash-inner">
+
+    <div
+      class="flash-face flash-front"
+      id="flashFront">
+    </div>
+
+    <div
+      class="flash-face flash-back"
+      id="flashBack">
+    </div>
+
+    </div>
+
+    </div>
+
+
+    <div
+      class="flash-controls">
+
+    <button
+      class="secondary"
+      id="previousCard">
+
+    Previous
+
+    </button>
+
+
+    <span
+      class="counter"
+      id="counter">
+    </span>
+
+
+    <button
+      class="secondary"
+      id="flipCard">
+
+    Flip
+
+    </button>
+
+
+    <button
+      class="primary"
+      id="nextCard">
+
+    Next
+
+    </button>
+
+    </div>
+
+    </div>
+    `;
+
+
+  const card =
+    document.getElementById(
+      "flashcard"
+    );
+
+
+  function showCard() {
+
+    if (
+      cards.length === 0
+    ) {
+
+      return;
+
+    }
+
+    card
     .classList
     .remove(
-      "show"
+      "flipped"
     );
 
 
     document
     .getElementById(
-      "topic"
+      "flashFront"
     )
-    .focus();
+    .textContent =
+      cards[index].front;
+
+
+    document
+    .getElementById(
+      "flashBack"
+    )
+    .textContent =
+      cards[index].back;
+
+
+    document
+    .getElementById(
+      "counter"
+    )
+    .textContent =
+      `${index + 1} / ${cards.length}`;
 
   }
 
-);
+
+  card.onclick =
+    () => {
+
+      card
+      .classList
+      .toggle(
+        "flipped"
+      );
+
+    };
+
+
+  document
+  .getElementById(
+    "flipCard"
+  )
+  .onclick =
+    () => {
+
+      card
+      .classList
+      .toggle(
+        "flipped"
+      );
+
+    };
+
+
+  document
+  .getElementById(
+    "previousCard"
+  )
+  .onclick =
+    () => {
+
+      index =
+        (
+          index -
+          1 +
+          cards.length
+        )
+        %
+        cards.length;
+
+      showCard();
+
+    };
+
+
+  document
+  .getElementById(
+    "nextCard"
+  )
+  .onclick =
+    () => {
+
+      index =
+        (
+          index +
+          1
+        )
+        %
+        cards.length;
+
+      showCard();
+
+    };
+
+
+  showCard();
+
+}
+
+
+/* TEACH ME */
+
+function renderLesson(
+  data
+) {
+
+  const sections =
+    Array.isArray(
+      data.sections
+    )
+    ?
+    data.sections
+    :
+    [];
+
+  const recap =
+    Array.isArray(
+      data.recap
+    )
+    ?
+    data.recap
+    :
+    [];
+
+
+  result.innerHTML =
+    `
+    <div
+      class="panel lesson">
+
+    <h2>
+    ${escapeHtml(
+      data.title ||
+      "Lesson"
+    )}
+    </h2>
+
+    <p>
+    ${escapeHtml(
+      data.overview ||
+      ""
+    )}
+    </p>
+
+
+    ${sections.map(
+      section =>
+        `
+        <div
+          class="lesson-section">
+
+        <h3>
+        ${escapeHtml(
+          section.heading
+        )}
+        </h3>
+
+        <p>
+        ${escapeHtml(
+          section.content
+        )}
+        </p>
+
+        </div>
+        `
+    ).join("")}
+
+
+    ${
+      data.example
+      ?
+      `
+      <div
+        class="callout">
+
+      <b>
+      ${escapeHtml(
+        data.example.heading ||
+        "Example"
+      )}
+      </b>
+
+      <p>
+      ${escapeHtml(
+        data.example.content ||
+        ""
+      )}
+      </p>
+
+      </div>
+      `
+      :
+      ""
+    }
+
+
+    ${
+      data.checkQuestion
+      ?
+      `
+      <div
+        class="callout">
+
+      <b>
+      Check yourself
+      </b>
+
+      <p>
+      ${escapeHtml(
+        data.checkQuestion
+      )}
+      </p>
+
+      <button
+        class="secondary"
+        id="showLessonAnswer">
+
+      Show answer
+
+      </button>
+
+      <p
+        id="lessonAnswer"
+        style="display:none">
+
+      ${escapeHtml(
+        data.answer ||
+        ""
+      )}
+
+      </p>
+
+      </div>
+      `
+      :
+      ""
+    }
+
+
+    ${
+      recap.length
+      ?
+      `
+      <h3>
+      Quick recap
+      </h3>
+
+      <div
+        class="recap">
+
+      ${recap.map(
+        item =>
+          `
+          <div>
+          ${escapeHtml(
+            item
+          )}
+          </div>
+          `
+      ).join("")}
+
+      </div>
+      `
+      :
+      ""
+    }
+
+    </div>
+    `;
+
+
+  const showAnswer =
+    document.getElementById(
+      "showLessonAnswer"
+    );
+
+  if (showAnswer) {
+
+    showAnswer.onclick =
+      () => {
+
+        document
+        .getElementById(
+          "lessonAnswer"
+        )
+        .style.display =
+          "block";
+
+        showAnswer.style.display =
+          "none";
+
+      };
+
+  }
+
+}
+
+
+/* NOTES */
+
+function renderNotes(
+  data
+) {
+
+  const sections =
+    Array.isArray(
+      data.sections
+    )
+    ?
+    data.sections
+    :
+    [];
+
+  const keywords =
+    Array.isArray(
+      data.keywords
+    )
+    ?
+    data.keywords
+    :
+    [];
+
+  const tips =
+    Array.isArray(
+      data.examTips
+    )
+    ?
+    data.examTips
+    :
+    [];
+
+
+  result.innerHTML =
+    `
+    <div
+      class="panel notes">
+
+    <h2>
+    ${escapeHtml(
+      data.title ||
+      "Revision Notes"
+    )}
+    </h2>
+
+
+    <p>
+    ${escapeHtml(
+      data.summary ||
+      ""
+    )}
+    </p>
+
+
+    ${sections.map(
+      section =>
+        `
+        <div
+          class="notes-section">
+
+        <h3>
+        ${escapeHtml(
+          section.heading
+        )}
+        </h3>
+
+        <ul>
+
+        ${(section.bullets || [])
+          .map(
+            bullet =>
+              `
+              <li>
+              ${escapeHtml(
+                bullet
+              )}
+              </li>
+              `
+          )
+          .join("")
+        }
+
+        </ul>
+
+        </div>
+        `
+    ).join("")}
+
+
+    ${
+      keywords.length
+      ?
+      `
+      <h3>
+      Key words
+      </h3>
+
+      <div
+        class="keywords">
+
+      ${keywords.map(
+        keyword =>
+          `
+          <div
+            class="keyword">
+
+          <b>
+          ${escapeHtml(
+            keyword.term
+          )}
+          </b>
+
+          <span>
+          ${escapeHtml(
+            keyword.meaning
+          )}
+          </span>
+
+          </div>
+          `
+      ).join("")}
+
+      </div>
+      `
+      :
+      ""
+    }
+
+
+    ${
+      tips.length
+      ?
+      `
+      <h3>
+      Exam tips
+      </h3>
+
+      ${tips.map(
+        tip =>
+          `
+          <div
+            class="tip">
+
+          ${escapeHtml(
+            tip
+          )}
+
+          </div>
+          `
+      ).join("")}
+      `
+      :
+      ""
+    }
+
+    </div>
+    `;
+
+}
+
+
+/* SECURITY */
+
+function escapeHtml(
+  value
+) {
+
+  return String(
+    value ?? ""
+  )
+  .replace(
+    /[&<>"']/g,
+    character => ({
+
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;"
+
+    })[character]
+  );
+
+}
 
 </script>
 
