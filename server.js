@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 const OpenAI = require("openai");
 
 const app = express();
@@ -9,7 +10,7 @@ const SUPABASE_URL = "https://rikeknoqjmnxkgfutmpy.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_NfbRUCQo1cb0rMmJ1pHcaA_AsuubptW";
 
 app.use(express.json({ limit: "2mb" }));
-app.use(express.static(__dirname));
+app.use(express.static(__dirname, { index: false }));
 
 function cleanTopic(topic){ return String(topic || "").trim().slice(0,500); }
 function safeJsonParse(text){
@@ -117,5 +118,53 @@ app.post("/api/generate",requireUser,async(req,res)=>{
   }
 });
 
-app.get("*",(_req,res)=>res.sendFile(path.join(__dirname,"index.html")));
-app.listen(PORT,"0.0.0.0",()=>console.log(`AI Learning Switchboard v2.2 running on port ${PORT}`));
+const passwordResetEnhancement = `
+<style>
+#forgotPassword{background:transparent;border:0;color:#635bff;font-weight:800;cursor:pointer;padding:10px 4px}
+#resetOverlay{position:fixed;inset:0;background:rgba(23,32,51,.55);display:none;align-items:center;justify-content:center;padding:18px;z-index:9999;backdrop-filter:blur(6px)}
+#resetOverlay.open{display:flex}#resetBox{width:min(460px,100%);background:white;border-radius:22px;padding:24px;box-shadow:0 24px 70px rgba(0,0,0,.25)}#resetBox input{width:100%;border:1px solid rgba(92,111,154,.22);border-radius:14px;padding:13px;margin:8px 0}#resetBox .resetActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+</style>
+<div id="resetOverlay"><div id="resetBox"><h2 style="margin-top:0">🔐 Choose a new password</h2><p style="color:#68738a">Enter a new password for your Learning Switchboard account.</p><input id="newPassword" type="password" placeholder="New password (minimum 6 characters)"><input id="confirmPassword" type="password" placeholder="Confirm new password"><div id="resetMessage" style="font-size:13px;color:#68738a;margin-top:5px"></div><div class="resetActions"><button id="updatePassword" class="primary">Update password</button><button id="cancelReset" class="secondary">Cancel</button></div></div></div>
+<script>
+(function(){
+  function addForgotButton(){
+    var card=document.getElementById('authCard');
+    if(!card||document.getElementById('forgotPassword')) return;
+    var btn=document.createElement('button'); btn.id='forgotPassword'; btn.type='button'; btn.textContent='Forgot password?';
+    var msg=document.getElementById('authMessage'); card.insertBefore(btn,msg||null);
+    btn.onclick=async function(){
+      var email=(document.getElementById('email')?.value||'').trim();
+      if(!email){ if(msg) msg.textContent='Enter your email address first, then tap Forgot password.'; return; }
+      btn.disabled=true; btn.textContent='Sending reset email...';
+      try{
+        var result=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+'/'});
+        if(result.error) throw result.error;
+        if(msg) msg.textContent='Password reset email sent. Open the link in your email to choose a new password.';
+      }catch(e){ if(msg) msg.textContent=e.message||'Could not send password reset email.'; }
+      finally{btn.disabled=false;btn.textContent='Forgot password?';}
+    };
+  }
+  function openReset(){document.getElementById('resetOverlay')?.classList.add('open');}
+  function closeReset(){document.getElementById('resetOverlay')?.classList.remove('open');}
+  var timer=setInterval(function(){if(window.sb){clearInterval(timer);addForgotButton();sb.auth.onAuthStateChange(function(event){if(event==='PASSWORD_RECOVERY')openReset();});}},100);
+  document.getElementById('cancelReset').onclick=closeReset;
+  document.getElementById('updatePassword').onclick=async function(){
+    var p=document.getElementById('newPassword').value, c=document.getElementById('confirmPassword').value, m=document.getElementById('resetMessage');
+    if(p.length<6){m.textContent='Password must be at least 6 characters.';return;}
+    if(p!==c){m.textContent='The passwords do not match.';return;}
+    this.disabled=true;m.textContent='Updating password...';
+    try{var result=await sb.auth.updateUser({password:p});if(result.error)throw result.error;m.textContent='Password updated successfully. You can now continue learning.';setTimeout(closeReset,1200);}catch(e){m.textContent=e.message||'Could not update password.';}finally{this.disabled=false;}
+  };
+})();
+</script>`;
+
+function sendApp(_req,res){
+  try{
+    const html=fs.readFileSync(path.join(__dirname,"index.html"),"utf8");
+    res.type("html").send(html.replace("</body>",passwordResetEnhancement+"</body>"));
+  }catch(error){console.error("App shell error:",error);res.status(500).send("Unable to load the app.");}
+}
+app.get("/",sendApp);
+app.get("/index.html",sendApp);
+app.get("*",sendApp);
+app.listen(PORT,"0.0.0.0",()=>console.log(`AI Learning Switchboard v2.3 running on port ${PORT}`));
