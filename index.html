@@ -1,2218 +1,248 @@
 <!doctype html>
-
 <html lang="en">
-
 <head>
-
 <meta charset="utf-8">
-
-<meta
-  name="viewport"
-  content="width=device-width,initial-scale=1">
-
-<title>
-AI Learning Switchboard
-</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Learning Switchboard v2</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-
-:root {
-
-  --bg: #f7f8fc;
-  --card: #ffffff;
-  --text: #1e2430;
-  --muted: #667085;
-  --line: #e7eaf0;
-
-  --accent: #4f46e5;
-  --accent-light: #eef2ff;
-
-  --good: #067647;
-  --bad: #b42318;
-
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-
-  margin: 0;
-
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-
-  background: var(--bg);
-  color: var(--text);
-
-}
-
-.shell {
-
-  max-width: 1100px;
-  margin: auto;
-  padding: 24px;
-
-}
-
-.hero {
-
-  padding:
-    18px 0
-    10px;
-
-}
-
-.hero h1 {
-
-  font-size:
-    clamp(
-      28px,
-      5vw,
-      44px
-    );
-
-  margin:
-    0 0 8px;
-
-}
-
-.hero p {
-
-  color: var(--muted);
-  margin: 0;
-
-}
-
-/* SWITCHES */
-
-.modes {
-
-  display: grid;
-
-  grid-template-columns:
-    repeat(
-      3,
-      minmax(0, 1fr)
-    );
-
-  gap: 12px;
-
-  margin:
-    22px 0;
-
-}
-
-.mode {
-
-  background: white;
-
-  border:
-    1px solid
-    var(--line);
-
-  border-radius: 18px;
-
-  padding: 16px;
-
-  text-align: left;
-
-  cursor: pointer;
-
-  transition:
-    0.18s;
-
-}
-
-.mode:hover {
-
-  transform:
-    translateY(-1px);
-
-  box-shadow:
-    0 8px 24px
-    rgba(
-      16,
-      24,
-      40,
-      0.08
-    );
-
-}
-
-.mode.active {
-
-  border-color:
-    var(--accent);
-
-  box-shadow:
-    0 0 0 3px
-    rgba(
-      79,
-      70,
-      229,
-      0.10
-    );
-
-}
-
-.icon {
-
-  font-size: 25px;
-
-}
-
-.mode b {
-
-  display: block;
-
-  margin-top: 7px;
-
-}
-
-.mode small {
-
-  display: block;
-
-  color:
-    var(--muted);
-
-  margin-top: 4px;
-
-  line-height: 1.35;
-
-}
-
-/* INPUT */
-
-.compose {
-
-  display: flex;
-
-  gap: 10px;
-
-  background: white;
-
-  border:
-    1px solid
-    var(--line);
-
-  padding: 10px;
-
-  border-radius: 18px;
-
-  position: sticky;
-
-  top: 8px;
-
-  z-index: 10;
-
-}
-
-input {
-
-  flex: 1;
-
-  border: 0;
-
-  outline: none;
-
-  font-size: 16px;
-
-  padding: 10px;
-
-  background:
-    transparent;
-
-  min-width: 0;
-
-}
-
-button {
-
-  border: 0;
-
-  border-radius: 12px;
-
-  padding:
-    11px 16px;
-
-  font-weight: 700;
-
-  cursor: pointer;
-
-}
-
-.primary {
-
-  background:
-    var(--accent);
-
-  color: white;
-
-}
-
-.secondary {
-
-  background:
-    #f2f4f7;
-
-  color:
-    #344054;
-
-}
-
-.result {
-
-  margin-top: 20px;
-
-  min-height: 100px;
-
-}
-
-.panel {
-
-  background: white;
-
-  border:
-    1px solid
-    var(--line);
-
-  border-radius: 20px;
-
-  padding: 20px;
-
-  margin-bottom: 14px;
-
-}
-
-/* LOADING */
-
-.loading {
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 10px;
-
-  color:
-    var(--muted);
-
-}
-
-.spinner {
-
-  width: 18px;
-  height: 18px;
-
-  border:
-    2px solid #ddd;
-
-  border-top-color:
-    var(--accent);
-
-  border-radius: 50%;
-
-  animation:
-    spin 0.8s
-    linear infinite;
-
-}
-
-@keyframes spin {
-
-  to {
-    transform:
-      rotate(360deg);
-  }
-
-}
-
-/* IMAGES */
-
-.generated-image {
-
-  display: block;
-
-  width: 100%;
-
-  max-width: 760px;
-
-  margin:
-    0 auto;
-
-  border-radius: 20px;
-
-  box-shadow:
-    0 10px 35px
-    rgba(
-      16,
-      24,
-      40,
-      0.14
-    );
-
-}
-
-/* QUIZ */
-
-.quiz-question {
-
-  margin-bottom: 25px;
-
-}
-
-.quiz-question h3 {
-
-  font-size: 17px;
-
-  margin:
-    0 0 12px;
-
-}
-
-.option {
-
-  display: flex;
-
-  gap: 10px;
-
-  align-items:
-    flex-start;
-
-  width: 100%;
-
-  text-align: left;
-
-  border:
-    1px solid
-    var(--line);
-
-  background: white;
-
-  margin:
-    8px 0;
-
-  padding: 13px;
-
-  border-radius: 12px;
-
-  font-weight: 500;
-
-}
-
-.option:hover {
-
-  background:
-    #fafaff;
-
-}
-
-.option.selected {
-
-  border-color:
-    var(--accent);
-
-  background:
-    var(--accent-light);
-
-}
-
-.option.correct {
-
-  border-color:
-    #12b76a;
-
-  background:
-    #ecfdf3;
-
-}
-
-.option.wrong {
-
-  border-color:
-    #f04438;
-
-  background:
-    #fef3f2;
-
-}
-
-.feedback {
-
-  font-size: 14px;
-
-  margin-top: 9px;
-
-  padding: 10px;
-
-  border-radius: 10px;
-
-  background:
-    #f9fafb;
-
-  color:
-    #475467;
-
-}
-
-.quiz-actions {
-
-  display: flex;
-
-  gap: 10px;
-
-  flex-wrap: wrap;
-
-}
-
-.score {
-
-  font-weight: 800;
-
-  margin:
-    15px 0;
-
-  color:
-    var(--accent);
-
-}
-
-/* FLASHCARDS */
-
-.flash-wrap {
-
-  text-align: center;
-
-}
-
-.flashcard {
-
-  max-width: 650px;
-
-  height: 330px;
-
-  margin:
-    10px auto
-    20px;
-
-  perspective:
-    1000px;
-
-  cursor: pointer;
-
-}
-
-.flash-inner {
-
-  position:
-    relative;
-
-  width: 100%;
-  height: 100%;
-
-  transition:
-    transform 0.5s;
-
-  transform-style:
-    preserve-3d;
-
-}
-
-.flashcard.flipped
-.flash-inner {
-
-  transform:
-    rotateY(180deg);
-
-}
-
-.flash-face {
-
-  position:
-    absolute;
-
-  inset: 0;
-
-  backface-visibility:
-    hidden;
-
-  border:
-    1px solid
-    var(--line);
-
-  border-radius:
-    24px;
-
-  background:
-    white;
-
-  display: flex;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  padding: 36px;
-
-  box-shadow:
-    0 10px 30px
-    rgba(
-      16,
-      24,
-      40,
-      0.08
-    );
-
-  font-size:
-    clamp(
-      22px,
-      4vw,
-      32px
-    );
-
-  font-weight: 800;
-
-}
-
-.flash-back {
-
-  transform:
-    rotateY(180deg);
-
-  background:
-    #f7f5ff;
-
-  font-size:
-    clamp(
-      18px,
-      3vw,
-      25px
-    );
-
-  font-weight: 650;
-
-}
-
-.flash-controls {
-
-  display: flex;
-
-  justify-content:
-    center;
-
-  align-items:
-    center;
-
-  gap: 10px;
-
-  flex-wrap: wrap;
-
-}
-
-.counter {
-
-  color:
-    var(--muted);
-
-  min-width:
-    80px;
-
-}
-
-/* TEACH ME */
-
-.lesson-section {
-
-  padding:
-    14px 0;
-
-  border-top:
-    1px solid
-    var(--line);
-
-}
-
-.callout {
-
-  background:
-    #f7f5ff;
-
-  border-left:
-    4px solid
-    var(--accent);
-
-  padding:
-    14px 16px;
-
-  border-radius:
-    10px;
-
-  margin-top:
-    14px;
-
-}
-
-.recap {
-
-  display: grid;
-
-  gap: 8px;
-
-}
-
-.recap div {
-
-  background:
-    #f9fafb;
-
-  padding:
-    10px 12px;
-
-  border-radius:
-    10px;
-
-}
-
-/* NOTES */
-
-.notes-section {
-
-  padding:
-    14px 0;
-
-  border-top:
-    1px solid
-    var(--line);
-
-}
-
-.keywords {
-
-  display: grid;
-
-  grid-template-columns:
-    repeat(
-      2,
-      minmax(0, 1fr)
-    );
-
-  gap: 10px;
-
-}
-
-.keyword {
-
-  background:
-    #f9fafb;
-
-  border:
-    1px solid
-    var(--line);
-
-  padding: 12px;
-
-  border-radius:
-    12px;
-
-}
-
-.keyword b {
-
-  display: block;
-
-  margin-bottom: 4px;
-
-}
-
-.tip {
-
-  background:
-    #fff7ed;
-
-  border:
-    1px solid
-    #fed7aa;
-
-  padding:
-    11px 13px;
-
-  border-radius:
-    12px;
-
-  margin:
-    8px 0;
-
-}
-
-/* ERROR */
-
-.error {
-
-  background:
-    #fff1f0;
-
-  border:
-    1px solid
-    #fecdca;
-
-  color:
-    #b42318;
-
-  padding: 14px;
-
-  border-radius: 14px;
-
-}
-
-/* MOBILE */
-
-@media
-(max-width: 760px) {
-
-  .modes {
-
-    grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
-
-  }
-
-  .compose {
-
-    flex-wrap:
-      wrap;
-
-  }
-
-  .compose input {
-
-    flex-basis:
-      100%;
-
-  }
-
-  .compose button {
-
-    flex: 1;
-
-  }
-
-  .keywords {
-
-    grid-template-columns:
-      1fr;
-
-  }
-
-  .shell {
-
-    padding: 16px;
-
-  }
-
-  .flashcard {
-
-    height:
-      290px;
-
-  }
-
-}
-
+:root{--bg:#f7f8fc;--card:#fff;--text:#1e2430;--muted:#667085;--line:#e7eaf0;--accent:#4f46e5;--accent2:#eef2ff;--good:#067647;--bad:#b42318}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}button,input,textarea{font:inherit}.shell{max-width:1100px;margin:auto;padding:20px}.topbar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.brand h1{margin:0;font-size:clamp(28px,5vw,44px)}.brand p{margin:6px 0 0;color:var(--muted)}.nav{display:flex;gap:8px;flex-wrap:wrap}.nav button,.btn{border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}.primary{background:var(--accent);color:#fff}.secondary{background:#f2f4f7;color:#344054}.danger{background:#fff1f0;color:var(--bad)}.ghost{background:#fff;border:1px solid var(--line)}.hidden{display:none!important}.status{font-size:13px;color:var(--muted)}
+.auth-card,.key-card,.panel,.library-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px}.auth-card,.key-card{margin-top:18px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.form-grid input,.search,.notesbox{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}.helper{font-size:13px;color:var(--muted);line-height:1.4}.modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:22px 0}.mode{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;text-align:left;cursor:pointer}.mode.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,70,229,.1)}.mode .icon{font-size:24px}.mode b{display:block;margin-top:7px}.mode small{display:block;color:var(--muted);margin-top:4px}.compose{display:flex;gap:10px;background:#fff;border:1px solid var(--line);padding:10px;border-radius:18px;position:sticky;top:8px;z-index:5}.compose input{flex:1;border:0;outline:0;font-size:16px;padding:10px;min-width:0}.result{margin-top:20px}.loading{display:flex;gap:10px;align-items:center;color:var(--muted)}.spinner{width:18px;height:18px;border:2px solid #ddd;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.generated-image{display:block;width:100%;max-width:760px;margin:auto;border-radius:20px;box-shadow:0 10px 35px rgba(16,24,40,.14)}.result-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 18px}.quiz-question{margin-bottom:24px}.quiz-question h3{font-size:17px}.option{width:100%;text-align:left;border:1px solid var(--line);background:#fff;margin:7px 0;padding:12px;border-radius:12px;cursor:pointer}.option.selected{border-color:var(--accent);background:var(--accent2)}.option.correct{border-color:#12b76a;background:#ecfdf3}.option.wrong{border-color:#f04438;background:#fef3f2}.feedback{font-size:14px;margin-top:8px;padding:9px;border-radius:10px;background:#f9fafb}.score{font-weight:800;color:var(--accent);margin:12px 0}.flash-wrap{text-align:center}.flashcard{max-width:650px;height:320px;margin:10px auto 20px;perspective:1000px;cursor:pointer}.flash-inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}.flashcard.flipped .flash-inner{transform:rotateY(180deg)}.flash-face{position:absolute;inset:0;backface-visibility:hidden;border:1px solid var(--line);border-radius:24px;background:#fff;display:flex;align-items:center;justify-content:center;padding:34px;font-size:clamp(22px,4vw,32px);font-weight:800}.flash-back{transform:rotateY(180deg);background:#f7f5ff;font-size:clamp(18px,3vw,25px);font-weight:650}.flash-controls{display:flex;justify-content:center;gap:10px;align-items:center;flex-wrap:wrap}.callout{background:#f7f5ff;border-left:4px solid var(--accent);padding:14px 16px;border-radius:10px;margin-top:14px}.lesson-section,.notes-section{padding:14px 0;border-top:1px solid var(--line)}.keywords{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.keyword,.recap div{background:#f9fafb;border:1px solid var(--line);padding:11px;border-radius:10px}.tip{background:#fff7ed;border:1px solid #fed7aa;padding:11px 13px;border-radius:12px;margin:8px 0}.error{background:#fff1f0;border:1px solid #fecdca;color:var(--bad);padding:14px;border-radius:14px}.success{background:#ecfdf3;border:1px solid #abefc6;color:var(--good);padding:12px;border-radius:12px}.library-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:22px 0}.library-head .search{flex:1;min-width:220px}.library-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.library-card h3{margin:0 0 6px}.meta{color:var(--muted);font-size:13px}.library-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.empty{text-align:center;color:var(--muted);padding:40px 10px}.star{font-size:18px}.view-title{margin-top:24px}
+@media(max-width:760px){.modes,.library-grid,.form-grid,.keywords{grid-template-columns:1fr}.compose{flex-wrap:wrap}.compose input{flex-basis:100%}.compose button{flex:1}.shell{padding:14px}.flashcard{height:285px}}
 </style>
-
 </head>
-
 <body>
-
 <div class="shell">
+  <div class="topbar">
+    <div class="brand"><h1>AI Learning Switchboard <span style="font-size:.45em">v2.0</span></h1><p>Learn in the right format. Save it. Return to it later.</p></div>
+    <div class="nav">
+      <button id="learnTab" class="primary">✨ Learn</button>
+      <button id="libraryTab" class="secondary">📚 My Learning</button>
+      <button id="signOut" class="secondary hidden">Sign out</button>
+    </div>
+  </div>
 
-<div class="hero">
+  <div id="authCard" class="auth-card">
+    <h2>Sign in to your learning space</h2>
+    <p class="helper">Your saved learning is private to your Supabase account.</p>
+    <div class="form-grid">
+      <input id="email" type="email" placeholder="Email address">
+      <input id="password" type="password" placeholder="Password (minimum 6 characters)">
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <button id="signIn" class="primary">Sign in</button>
+      <button id="signUp" class="secondary">Create account</button>
+    </div>
+    <div id="authMessage" class="helper" style="margin-top:10px"></div>
+  </div>
 
-<h1>
-AI Learning Switchboard
-</h1>
+  <div id="keyCard" class="key-card hidden">
+    <h3 style="margin-top:0">🔑 Your OpenAI API key</h3>
+    <p class="helper">Generation uses your own OpenAI API account. The key is kept only in this browser session and is not written to Supabase.</p>
+    <div class="compose" style="position:static">
+      <input id="apiKey" type="password" placeholder="sk-...">
+      <button id="saveKey" class="primary">Use this key</button>
+      <button id="forgetKey" class="secondary">Forget key</button>
+    </div>
+    <div id="keyStatus" class="status" style="margin-top:8px"></div>
+  </div>
 
-<p>
-Choose a learning mode.
-Each switch uses its own native experience.
-</p>
+  <section id="learnView">
+    <div class="modes" id="modes">
+      <button class="mode active" data-mode="handwritten"><span class="icon">✍️</span><b>/handwritten</b><small>Handwritten notebook image</small></button>
+      <button class="mode" data-mode="visualise"><span class="icon">👁️</span><b>/visualise</b><small>Educational visual explanation</small></button>
+      <button class="mode" data-mode="teachme"><span class="icon">🎓</span><b>/teachme</b><small>Structured tutoring lesson</small></button>
+      <button class="mode" data-mode="quiz"><span class="icon">❓</span><b>/quiz</b><small>Interactive multiple-choice quiz</small></button>
+      <button class="mode" data-mode="flashcard"><span class="icon">🃏</span><b>/flashcard</b><small>Tap-to-flip study cards</small></button>
+      <button class="mode" data-mode="notes"><span class="icon">📝</span><b>/notes</b><small>Structured revision notes</small></button>
+    </div>
 
+    <div class="compose">
+      <input id="topic" placeholder="Enter a topic, e.g. mitochondria">
+      <button id="generate" class="primary">Generate</button>
+      <button id="clear" class="secondary">Clear</button>
+    </div>
+    <div class="result" id="result"></div>
+  </section>
+
+  <section id="libraryView" class="hidden">
+    <div class="library-head">
+      <input id="librarySearch" class="search" placeholder="Search My Learning">
+      <button id="refreshLibrary" class="secondary">Refresh</button>
+    </div>
+    <div id="libraryStatus" class="status"></div>
+    <div id="libraryGrid" class="library-grid"></div>
+    <div id="libraryOpen"></div>
+  </section>
 </div>
-
-
-<div
-  class="modes"
-  id="modes">
-
-<button
-  class="mode active"
-  data-mode="handwritten">
-
-<span class="icon">
-✍️
-</span>
-
-<b>
-/handwritten
-</b>
-
-<small>
-Handwritten notebook image
-</small>
-
-</button>
-
-
-<button
-  class="mode"
-  data-mode="visualise">
-
-<span class="icon">
-👁️
-</span>
-
-<b>
-/visualise
-</b>
-
-<small>
-Educational visual explanation
-</small>
-
-</button>
-
-
-<button
-  class="mode"
-  data-mode="teachme">
-
-<span class="icon">
-🎓
-</span>
-
-<b>
-/teachme
-</b>
-
-<small>
-Structured tutoring lesson
-</small>
-
-</button>
-
-
-<button
-  class="mode"
-  data-mode="quiz">
-
-<span class="icon">
-❓
-</span>
-
-<b>
-/quiz
-</b>
-
-<small>
-Interactive multiple-choice quiz
-</small>
-
-</button>
-
-
-<button
-  class="mode"
-  data-mode="flashcard">
-
-<span class="icon">
-🃏
-</span>
-
-<b>
-/flashcard
-</b>
-
-<small>
-Tap-to-flip study cards
-</small>
-
-</button>
-
-
-<button
-  class="mode"
-  data-mode="notes">
-
-<span class="icon">
-📝
-</span>
-
-<b>
-/notes
-</b>
-
-<small>
-Structured revision notes
-</small>
-
-</button>
-
-</div>
-
-
-<div class="compose">
-
-<input
-  id="topic"
-  placeholder="Enter a topic, e.g. mitochondria">
-
-<button
-  class="primary"
-  id="generate">
-
-Generate
-
-</button>
-
-<button
-  class="secondary"
-  id="clear">
-
-Clear
-
-</button>
-
-</div>
-
-
-<div
-  class="result"
-  id="result">
-</div>
-
-</div>
-
 
 <script>
-
-let mode =
-  "handwritten";
-
-const modes =
-  document.querySelectorAll(
-    ".mode"
-  );
-
-const topic =
-  document.getElementById(
-    "topic"
-  );
-
-const result =
-  document.getElementById(
-    "result"
-  );
-
-const generate =
-  document.getElementById(
-    "generate"
-  );
-
-
-modes.forEach(
-  button => {
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        modes.forEach(
-          item =>
-            item.classList.remove(
-              "active"
-            )
-        );
-
-        button.classList.add(
-          "active"
-        );
-
-        mode =
-          button.dataset.mode;
-
-      }
-    );
-
-  }
-);
-
-
-topic.addEventListener(
-  "keydown",
-  event => {
-
-    if (
-      event.key ===
-      "Enter"
-    ) {
-
-      generate.click();
-
-    }
-
-  }
-);
-
-
-document
-.getElementById(
-  "clear"
-)
-.addEventListener(
-  "click",
-  () => {
-
-    topic.value = "";
-
-    result.innerHTML =
-      "";
-
-    topic.focus();
-
-  }
-);
-
-
-generate.addEventListener(
-  "click",
-  async () => {
-
-    const value =
-      topic.value.trim();
-
-    if (!value) {
-
-      result.innerHTML =
-        `
-        <div class="error">
-        Please enter a topic first.
-        </div>
-        `;
-
-      return;
-
-    }
-
-    let loadingText =
-      "Building your learning experience...";
-
-    if (
-      mode ===
-      "handwritten"
-      ||
-      mode ===
-      "visualise"
-    ) {
-
-      loadingText =
-        "Creating your visual...";
-
-    }
-
-    result.innerHTML =
-      `
-      <div class="panel loading">
-
-      <span class="spinner">
-      </span>
-
-      ${loadingText}
-
-      </div>
-      `;
-
-    generate.disabled =
-      true;
-
-    try {
-
-      const response =
-        await fetch(
-          "/api/generate",
-          {
-
-            method:
-              "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json"
-            },
-
-            body:
-              JSON.stringify({
-                mode: mode,
-                topic: value
-              })
-
-          }
-        );
-
-      const data =
-        await response.json();
-
-      if (!response.ok) {
-
-        throw new Error(
-          data.error ||
-          "Generation failed"
-        );
-
-      }
-
-      render(data);
-
-    }
-
-    catch (error) {
-
-      result.innerHTML =
-        `
-        <div class="error">
-        ${escapeHtml(
-          error.message
-        )}
-        </div>
-        `;
-
-    }
-
-    finally {
-
-      generate.disabled =
-        false;
-
-    }
-
-  }
-);
-
-
-function render(data) {
-
-  if (
-    data.type ===
-    "image"
-  ) {
-
-    renderImage(data);
-
-    return;
-
-  }
-
-  if (
-    data.type ===
-    "quiz"
-  ) {
-
-    renderQuiz(data);
-
-    return;
-
-  }
-
-  if (
-    data.type ===
-    "flashcards"
-  ) {
-
-    renderFlashcards(
-      data
-    );
-
-    return;
-
-  }
-
-  if (
-    data.type ===
-    "lesson"
-  ) {
-
-    renderLesson(data);
-
-    return;
-
-  }
-
-  if (
-    data.type ===
-    "notes"
-  ) {
-
-    renderNotes(data);
-
-    return;
-
-  }
-
-  result.innerHTML =
-    `
-    <div class="error">
-    Unsupported response type.
-    </div>
-    `;
-
+let sb = null;
+let session = null;
+let mode = "handwritten";
+let currentTopic = "";
+let currentResult = null;
+let quizScore = null;
+let quizTotal = null;
+let libraryItems = [];
+
+const $ = id => document.getElementById(id);
+const esc = value => String(value ?? "").replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
+
+async function init(){
+  const cfg = await fetch('/api/config').then(r=>r.json());
+  sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabasePublishableKey);
+  const { data } = await sb.auth.getSession();
+  session = data.session;
+  applyAuthState();
+  sb.auth.onAuthStateChange((_event,newSession)=>{session=newSession;applyAuthState();});
+  const stored = sessionStorage.getItem('userOpenAIKey') || '';
+  if(stored) $('apiKey').value = stored;
+  updateKeyStatus();
 }
 
-
-/* IMAGE */
-
-function renderImage(data) {
-
-  result.innerHTML =
-    `
-    <img
-      class="generated-image"
-      src="${data.image}"
-      alt="Generated educational visual">
-    `;
-
+function applyAuthState(){
+  const signedIn = !!session;
+  $('authCard').classList.toggle('hidden', signedIn);
+  $('keyCard').classList.toggle('hidden', !signedIn);
+  $('signOut').classList.toggle('hidden', !signedIn);
+  if(signedIn){ $('authMessage').textContent=''; }
 }
 
-
-/* QUIZ */
-
-function renderQuiz(data) {
-
-  const questions =
-    Array.isArray(
-      data.questions
-    )
-    ?
-    data.questions
-    :
-    [];
-
-  result.innerHTML =
-    `
-    <div class="panel">
-
-    <h2>
-    ${escapeHtml(
-      data.title ||
-      "Quiz"
-    )}
-    </h2>
-
-    <div id="quizBox">
-    </div>
-
-    <div class="quiz-actions">
-
-    <button
-      class="primary"
-      id="submitQuiz">
-
-    Check answers
-
-    </button>
-
-    <button
-      class="secondary"
-      id="resetQuiz">
-
-    Reset
-
-    </button>
-
-    </div>
-
-    <div id="scoreBox">
-    </div>
-
-    </div>
-    `;
-
-
-  const box =
-    document.getElementById(
-      "quizBox"
-    );
-
-  const selections =
-    {};
-
-
-  questions.forEach(
-    (question, questionIndex) => {
-
-      const wrapper =
-        document.createElement(
-          "div"
-        );
-
-      wrapper.className =
-        "quiz-question";
-
-      wrapper.innerHTML =
-        `
-        <h3>
-        ${questionIndex + 1}.
-        ${escapeHtml(
-          question.question
-        )}
-        </h3>
-        `;
-
-
-      question.options.forEach(
-        (option, optionIndex) => {
-
-          const button =
-            document.createElement(
-              "button"
-            );
-
-          button.className =
-            "option";
-
-          button.innerHTML =
-            `
-            <span>
-            ${String.fromCharCode(
-              65 +
-              optionIndex
-            )}.
-            </span>
-
-            <span>
-            ${escapeHtml(
-              option
-            )}
-            </span>
-            `;
-
-
-          button.onclick =
-            () => {
-
-              selections[
-                questionIndex
-              ] =
-                optionIndex;
-
-              wrapper
-              .querySelectorAll(
-                ".option"
-              )
-              .forEach(
-                item =>
-                  item
-                  .classList
-                  .remove(
-                    "selected"
-                  )
-              );
-
-              button
-              .classList
-              .add(
-                "selected"
-              );
-
-            };
-
-
-          wrapper.appendChild(
-            button
-          );
-
-        }
-      );
-
-
-      const feedback =
-        document.createElement(
-          "div"
-        );
-
-      feedback.className =
-        "feedback";
-
-      feedback.style.display =
-        "none";
-
-      feedback.id =
-        `feedback-${questionIndex}`;
-
-      wrapper.appendChild(
-        feedback
-      );
-
-      box.appendChild(
-        wrapper
-      );
-
-    }
-  );
-
-
-  document
-  .getElementById(
-    "submitQuiz"
-  )
-  .onclick =
-    () => {
-
-      let score =
-        0;
-
-      questions.forEach(
-        (question, questionIndex) => {
-
-          const wrapper =
-            box.children[
-              questionIndex
-            ];
-
-          const options =
-            wrapper
-            .querySelectorAll(
-              ".option"
-            );
-
-
-          options.forEach(
-            (option, optionIndex) => {
-
-              option
-              .classList
-              .remove(
-                "correct",
-                "wrong"
-              );
-
-
-              if (
-                optionIndex ===
-                Number(
-                  question.correctIndex
-                )
-              ) {
-
-                option
-                .classList
-                .add(
-                  "correct"
-                );
-
-              }
-
-
-              if (
-                selections[
-                  questionIndex
-                ] ===
-                optionIndex
-                &&
-                optionIndex !==
-                Number(
-                  question.correctIndex
-                )
-              ) {
-
-                option
-                .classList
-                .add(
-                  "wrong"
-                );
-
-              }
-
-            }
-          );
-
-
-          if (
-            selections[
-              questionIndex
-            ] ===
-            Number(
-              question.correctIndex
-            )
-          ) {
-
-            score++;
-
-          }
-
-
-          const feedback =
-            document.getElementById(
-              `feedback-${questionIndex}`
-            );
-
-          feedback.style.display =
-            "block";
-
-          feedback.textContent =
-            question.explanation ||
-            "";
-
-        }
-      );
-
-
-      document
-      .getElementById(
-        "scoreBox"
-      )
-      .innerHTML =
-        `
-        <div class="score">
-
-        Score:
-        ${score}
-        /
-        ${questions.length}
-
-        </div>
-        `;
-
-    };
-
-
-  document
-  .getElementById(
-    "resetQuiz"
-  )
-  .onclick =
-    () => {
-
-      renderQuiz(data);
-
-    };
-
+$('signIn').onclick = async()=>{
+  $('authMessage').textContent='Signing in...';
+  const { error } = await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
+  $('authMessage').textContent = error ? error.message : 'Signed in.';
+};
+
+$('signUp').onclick = async()=>{
+  $('authMessage').textContent='Creating account...';
+  const { data,error } = await sb.auth.signUp({email:$('email').value.trim(),password:$('password').value});
+  if(error) $('authMessage').textContent=error.message;
+  else if(!data.session) $('authMessage').textContent='Account created. Check your email to confirm your address, then sign in.';
+  else $('authMessage').textContent='Account created and signed in.';
+};
+
+$('signOut').onclick = async()=>{ await sb.auth.signOut(); sessionStorage.removeItem('userOpenAIKey'); currentResult=null; $('result').innerHTML=''; };
+$('saveKey').onclick = ()=>{ const key=$('apiKey').value.trim(); if(!key){$('keyStatus').textContent='Enter an API key first.';return;} sessionStorage.setItem('userOpenAIKey',key); updateKeyStatus(); };
+$('forgetKey').onclick = ()=>{ sessionStorage.removeItem('userOpenAIKey'); $('apiKey').value=''; updateKeyStatus(); };
+function updateKeyStatus(){ $('keyStatus').textContent = sessionStorage.getItem('userOpenAIKey') ? '✓ API key loaded for this browser session.' : 'No API key loaded yet.'; }
+
+$('learnTab').onclick=()=>showView('learn');
+$('libraryTab').onclick=()=>showView('library');
+function showView(which){
+  $('learnView').classList.toggle('hidden',which!=='learn');
+  $('libraryView').classList.toggle('hidden',which!=='library');
+  $('learnTab').className=which==='learn'?'primary':'secondary';
+  $('libraryTab').className=which==='library'?'primary':'secondary';
+  if(which==='library') loadLibrary();
 }
 
-
-/* FLASHCARDS */
-
-function renderFlashcards(
-  data
-) {
-
-  const cards =
-    Array.isArray(
-      data.cards
-    )
-    ?
-    data.cards
-    :
-    [];
-
-  let index =
-    0;
-
-
-  result.innerHTML =
-    `
-    <div
-      class="panel flash-wrap">
-
-    <h2>
-    ${escapeHtml(
-      data.title ||
-      "Flashcards"
-    )}
-    </h2>
-
-
-    <div
-      class="flashcard"
-      id="flashcard">
-
-    <div
-      class="flash-inner">
-
-    <div
-      class="flash-face flash-front"
-      id="flashFront">
-    </div>
-
-    <div
-      class="flash-face flash-back"
-      id="flashBack">
-    </div>
-
-    </div>
-
-    </div>
-
-
-    <div
-      class="flash-controls">
-
-    <button
-      class="secondary"
-      id="previousCard">
-
-    Previous
-
-    </button>
-
-
-    <span
-      class="counter"
-      id="counter">
-    </span>
-
-
-    <button
-      class="secondary"
-      id="flipCard">
-
-    Flip
-
-    </button>
-
-
-    <button
-      class="primary"
-      id="nextCard">
-
-    Next
-
-    </button>
-
-    </div>
-
-    </div>
-    `;
-
-
-  const card =
-    document.getElementById(
-      "flashcard"
-    );
-
-
-  function showCard() {
-
-    if (
-      cards.length === 0
-    ) {
-
-      return;
-
-    }
-
-    card
-    .classList
-    .remove(
-      "flipped"
-    );
-
-
-    document
-    .getElementById(
-      "flashFront"
-    )
-    .textContent =
-      cards[index].front;
-
-
-    document
-    .getElementById(
-      "flashBack"
-    )
-    .textContent =
-      cards[index].back;
-
-
-    document
-    .getElementById(
-      "counter"
-    )
-    .textContent =
-      `${index + 1} / ${cards.length}`;
-
-  }
-
-
-  card.onclick =
-    () => {
-
-      card
-      .classList
-      .toggle(
-        "flipped"
-      );
-
-    };
-
-
-  document
-  .getElementById(
-    "flipCard"
-  )
-  .onclick =
-    () => {
-
-      card
-      .classList
-      .toggle(
-        "flipped"
-      );
-
-    };
-
-
-  document
-  .getElementById(
-    "previousCard"
-  )
-  .onclick =
-    () => {
-
-      index =
-        (
-          index -
-          1 +
-          cards.length
-        )
-        %
-        cards.length;
-
-      showCard();
-
-    };
-
-
-  document
-  .getElementById(
-    "nextCard"
-  )
-  .onclick =
-    () => {
-
-      index =
-        (
-          index +
-          1
-        )
-        %
-        cards.length;
-
-      showCard();
-
-    };
-
-
-  showCard();
-
+document.querySelectorAll('.mode').forEach(button=>button.onclick=()=>{
+  document.querySelectorAll('.mode').forEach(x=>x.classList.remove('active'));
+  button.classList.add('active'); mode=button.dataset.mode;
+});
+$('topic').addEventListener('keydown',e=>{if(e.key==='Enter')$('generate').click();});
+$('clear').onclick=()=>{$('topic').value='';$('result').innerHTML='';currentResult=null;currentTopic='';};
+
+$('generate').onclick=async()=>{
+  if(!session){ $('result').innerHTML='<div class="error">Please sign in first.</div>'; return; }
+  const key=sessionStorage.getItem('userOpenAIKey');
+  if(!key){ $('result').innerHTML='<div class="error">Add your OpenAI API key above before generating.</div>'; return; }
+  const t=$('topic').value.trim();
+  if(!t){ $('result').innerHTML='<div class="error">Please enter a topic.</div>'; return; }
+  currentTopic=t; currentResult=null; quizScore=null; quizTotal=null;
+  $('result').innerHTML='<div class="panel loading"><div class="spinner"></div>Generating '+esc(mode)+' for '+esc(t)+'...</div>';
+  try{
+    const response=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'x-openai-key':key},body:JSON.stringify({mode,topic:t})});
+    const data=await response.json();
+    if(!response.ok) throw new Error(data.error||'Generation failed');
+    currentResult=data; renderCurrent(data,$('result'),true);
+  }catch(err){ $('result').innerHTML='<div class="error">'+esc(err.message)+'</div>'; }
+};
+
+function resultActions(){
+  return `<div class="result-actions"><button class="primary" onclick="saveCurrent()">💾 Save to My Learning</button><button class="secondary" onclick="showView('library')">📚 Open My Learning</button></div>`;
 }
 
-
-/* TEACH ME */
-
-function renderLesson(
-  data
-) {
-
-  const sections =
-    Array.isArray(
-      data.sections
-    )
-    ?
-    data.sections
-    :
-    [];
-
-  const recap =
-    Array.isArray(
-      data.recap
-    )
-    ?
-    data.recap
-    :
-    [];
-
-
-  result.innerHTML =
-    `
-    <div
-      class="panel lesson">
-
-    <h2>
-    ${escapeHtml(
-      data.title ||
-      "Lesson"
-    )}
-    </h2>
-
-    <p>
-    ${escapeHtml(
-      data.overview ||
-      ""
-    )}
-    </p>
-
-
-    ${sections.map(
-      section =>
-        `
-        <div
-          class="lesson-section">
-
-        <h3>
-        ${escapeHtml(
-          section.heading
-        )}
-        </h3>
-
-        <p>
-        ${escapeHtml(
-          section.content
-        )}
-        </p>
-
-        </div>
-        `
-    ).join("")}
-
-
-    ${
-      data.example
-      ?
-      `
-      <div
-        class="callout">
-
-      <b>
-      ${escapeHtml(
-        data.example.heading ||
-        "Example"
-      )}
-      </b>
-
-      <p>
-      ${escapeHtml(
-        data.example.content ||
-        ""
-      )}
-      </p>
-
-      </div>
-      `
-      :
-      ""
-    }
-
-
-    ${
-      data.checkQuestion
-      ?
-      `
-      <div
-        class="callout">
-
-      <b>
-      Check yourself
-      </b>
-
-      <p>
-      ${escapeHtml(
-        data.checkQuestion
-      )}
-      </p>
-
-      <button
-        class="secondary"
-        id="showLessonAnswer">
-
-      Show answer
-
-      </button>
-
-      <p
-        id="lessonAnswer"
-        style="display:none">
-
-      ${escapeHtml(
-        data.answer ||
-        ""
-      )}
-
-      </p>
-
-      </div>
-      `
-      :
-      ""
-    }
-
-
-    ${
-      recap.length
-      ?
-      `
-      <h3>
-      Quick recap
-      </h3>
-
-      <div
-        class="recap">
-
-      ${recap.map(
-        item =>
-          `
-          <div>
-          ${escapeHtml(
-            item
-          )}
-          </div>
-          `
-      ).join("")}
-
-      </div>
-      `
-      :
-      ""
-    }
-
-    </div>
-    `;
-
-
-  const showAnswer =
-    document.getElementById(
-      "showLessonAnswer"
-    );
-
-  if (showAnswer) {
-
-    showAnswer.onclick =
-      () => {
-
-        document
-        .getElementById(
-          "lessonAnswer"
-        )
-        .style.display =
-          "block";
-
-        showAnswer.style.display =
-          "none";
-
-      };
-
-  }
-
+function renderCurrent(data,target,showActions=false){
+  if(!data){target.innerHTML='';return;}
+  if(data.type==='image') renderImage(data,target);
+  else if(data.type==='quiz') renderQuiz(data,target);
+  else if(data.type==='flashcards') renderFlashcards(data,target);
+  else if(data.type==='lesson') renderLesson(data,target);
+  else if(data.type==='notes') renderNotes(data,target);
+  else target.innerHTML='<div class="error">Unknown saved result type.</div>';
+  if(showActions) target.insertAdjacentHTML('afterbegin',resultActions());
 }
 
+function renderImage(data,target){ target.innerHTML=`<div class="panel"><img class="generated-image" src="${esc(data.image)}" alt="Generated learning visual"></div>`; }
 
-/* NOTES */
-
-function renderNotes(
-  data
-) {
-
-  const sections =
-    Array.isArray(
-      data.sections
-    )
-    ?
-    data.sections
-    :
-    [];
-
-  const keywords =
-    Array.isArray(
-      data.keywords
-    )
-    ?
-    data.keywords
-    :
-    [];
-
-  const tips =
-    Array.isArray(
-      data.examTips
-    )
-    ?
-    data.examTips
-    :
-    [];
-
-
-  result.innerHTML =
-    `
-    <div
-      class="panel notes">
-
-    <h2>
-    ${escapeHtml(
-      data.title ||
-      "Revision Notes"
-    )}
-    </h2>
-
-
-    <p>
-    ${escapeHtml(
-      data.summary ||
-      ""
-    )}
-    </p>
-
-
-    ${sections.map(
-      section =>
-        `
-        <div
-          class="notes-section">
-
-        <h3>
-        ${escapeHtml(
-          section.heading
-        )}
-        </h3>
-
-        <ul>
-
-        ${(section.bullets || [])
-          .map(
-            bullet =>
-              `
-              <li>
-              ${escapeHtml(
-                bullet
-              )}
-              </li>
-              `
-          )
-          .join("")
-        }
-
-        </ul>
-
-        </div>
-        `
-    ).join("")}
-
-
-    ${
-      keywords.length
-      ?
-      `
-      <h3>
-      Key words
-      </h3>
-
-      <div
-        class="keywords">
-
-      ${keywords.map(
-        keyword =>
-          `
-          <div
-            class="keyword">
-
-          <b>
-          ${escapeHtml(
-            keyword.term
-          )}
-          </b>
-
-          <span>
-          ${escapeHtml(
-            keyword.meaning
-          )}
-          </span>
-
-          </div>
-          `
-      ).join("")}
-
-      </div>
-      `
-      :
-      ""
-    }
-
-
-    ${
-      tips.length
-      ?
-      `
-      <h3>
-      Exam tips
-      </h3>
-
-      ${tips.map(
-        tip =>
-          `
-          <div
-            class="tip">
-
-          ${escapeHtml(
-            tip
-          )}
-
-          </div>
-          `
-      ).join("")}
-      `
-      :
-      ""
-    }
-
-    </div>
-    `;
-
+function renderQuiz(data,target){
+  const selections={};
+  target.innerHTML=`<div class="panel"><h2>${esc(data.title||'Quiz')}</h2>${(data.questions||[]).map((q,i)=>`<div class="quiz-question" data-q="${i}"><h3>${i+1}. ${esc(q.question)}</h3>${(q.options||[]).map((o,j)=>`<button class="option" data-i="${i}" data-j="${j}">${String.fromCharCode(65+j)}. ${esc(o)}</button>`).join('')}<div class="feedback hidden" id="fb-${i}"></div></div>`).join('')}<div id="quizScore"></div><div style="display:flex;gap:8px"><button id="checkQuiz" class="primary">Check answers</button><button id="resetQuiz" class="secondary">Reset</button></div></div>`;
+  target.querySelectorAll('.option').forEach(btn=>btn.onclick=()=>{const i=Number(btn.dataset.i);selections[i]=Number(btn.dataset.j);target.querySelectorAll(`.option[data-i="${i}"]`).forEach(x=>x.classList.remove('selected'));btn.classList.add('selected');});
+  target.querySelector('#checkQuiz').onclick=()=>{let score=0;(data.questions||[]).forEach((q,i)=>{const chosen=selections[i];target.querySelectorAll(`.option[data-i="${i}"]`).forEach(x=>{const j=Number(x.dataset.j);x.classList.remove('correct','wrong');if(j===q.correctIndex)x.classList.add('correct');else if(j===chosen)x.classList.add('wrong');});const fb=target.querySelector('#fb-'+i);fb.classList.remove('hidden');fb.textContent=(chosen===q.correctIndex?'Correct. ':'Review this one. ')+(q.explanation||'');if(chosen===q.correctIndex)score++;});quizScore=score;quizTotal=(data.questions||[]).length;target.querySelector('#quizScore').innerHTML=`<div class="score">Score: ${score}/${quizTotal}</div>`;};
+  target.querySelector('#resetQuiz').onclick=()=>renderQuiz(data,target);
 }
 
-
-/* SECURITY */
-
-function escapeHtml(
-  value
-) {
-
-  return String(
-    value ?? ""
-  )
-  .replace(
-    /[&<>"']/g,
-    character => ({
-
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#039;"
-
-    })[character]
-  );
-
+function renderFlashcards(data,target){
+  let index=0; const cards=data.cards||[];
+  target.innerHTML=`<div class="panel flash-wrap"><h2>${esc(data.title||'Flashcards')}</h2><div id="flashHost"></div></div>`;
+  const host=target.querySelector('#flashHost');
+  function draw(){const c=cards[index]||{front:'No card',back:''};host.innerHTML=`<div class="flashcard" id="fc"><div class="flash-inner"><div class="flash-face">${esc(c.front)}</div><div class="flash-face flash-back">${esc(c.back)}</div></div></div><div class="flash-controls"><button class="secondary" id="prev">Previous</button><button class="primary" id="flip">Flip</button><span>${index+1}/${cards.length||1}</span><button class="secondary" id="next">Next</button></div>`;host.querySelector('#fc').onclick=()=>host.querySelector('#fc').classList.toggle('flipped');host.querySelector('#flip').onclick=()=>host.querySelector('#fc').classList.toggle('flipped');host.querySelector('#prev').onclick=()=>{index=(index-1+cards.length)%cards.length;draw();};host.querySelector('#next').onclick=()=>{index=(index+1)%cards.length;draw();};}
+  draw();
 }
 
+function renderLesson(data,target){ target.innerHTML=`<div class="panel"><h2>${esc(data.title||'Lesson')}</h2><p>${esc(data.overview)}</p>${(data.sections||[]).map(s=>`<div class="lesson-section"><h3>${esc(s.heading)}</h3><p>${esc(s.content)}</p></div>`).join('')}<div class="callout"><b>${esc(data.example?.heading||'Example')}</b><p>${esc(data.example?.content||'')}</p></div><div class="callout"><b>Check your understanding</b><p>${esc(data.checkQuestion||'')}</p><button id="showAnswer" class="secondary">Show answer</button><p id="answer" class="hidden"><b>Answer:</b> ${esc(data.answer||'')}</p></div><h3>Recap</h3><div class="recap">${(data.recap||[]).map(x=>`<div>${esc(x)}</div>`).join('')}</div></div>`; const b=target.querySelector('#showAnswer'); if(b)b.onclick=()=>target.querySelector('#answer').classList.toggle('hidden'); }
+
+function renderNotes(data,target){ target.innerHTML=`<div class="panel"><h2>${esc(data.title||'Revision notes')}</h2><p>${esc(data.summary||'')}</p>${(data.sections||[]).map(s=>`<div class="notes-section"><h3>${esc(s.heading)}</h3><ul>${(s.bullets||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}<h3>Keywords</h3><div class="keywords">${(data.keywords||[]).map(k=>`<div class="keyword"><b>${esc(k.term)}</b>${esc(k.meaning)}</div>`).join('')}</div><h3>Exam tips</h3>${(data.examTips||[]).map(x=>`<div class="tip">${esc(x)}</div>`).join('')}</div>`; }
+
+async function compressImageData(dataUrl){
+  if(!String(dataUrl||'').startsWith('data:image/')) return dataUrl;
+  try{
+    const img=new Image();
+    await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=dataUrl;});
+    const maxW=1100; const scale=Math.min(1,maxW/img.width); const canvas=document.createElement('canvas'); canvas.width=Math.round(img.width*scale); canvas.height=Math.round(img.height*scale); canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height); return canvas.toDataURL('image/jpeg',0.78);
+  }catch(_){ return dataUrl; }
+}
+
+async function saveCurrent(){
+  if(!session||!currentResult) return;
+  try{
+    let payload=JSON.parse(JSON.stringify(currentResult));
+    if(payload.type==='image'&&payload.image) payload.image=await compressImageData(payload.image);
+    const row={user_id:session.user.id,topic:currentTopic,mode:payload.mode||mode,type:payload.type,title:payload.title||currentTopic,payload,is_favorite:false,personal_notes:'',quiz_score:quizScore,quiz_total:quizTotal};
+    const { error }=await sb.from('learning_items').insert(row);
+    if(error) throw error;
+    alert('Saved to My Learning.');
+  }catch(err){ alert('Could not save: '+err.message); }
+}
+
+$('refreshLibrary').onclick=loadLibrary;
+$('librarySearch').addEventListener('input',renderLibraryGrid);
+async function loadLibrary(){
+  if(!session){ $('libraryGrid').innerHTML='<div class="empty">Sign in to see your saved learning.</div>'; return; }
+  $('libraryStatus').textContent='Loading...';
+  const { data,error }=await sb.from('learning_items').select('*').order('created_at',{ascending:false});
+  if(error){$('libraryStatus').textContent=error.message;return;}
+  libraryItems=data||[]; $('libraryStatus').textContent=libraryItems.length+' saved item'+(libraryItems.length===1?'':'s'); renderLibraryGrid();
+}
+
+function renderLibraryGrid(){
+  const q=$('librarySearch').value.trim().toLowerCase();
+  const rows=libraryItems.filter(x=>!q||String(x.topic).toLowerCase().includes(q)||String(x.mode).toLowerCase().includes(q)||String(x.title||'').toLowerCase().includes(q));
+  $('libraryGrid').innerHTML=rows.length?rows.map(x=>`<div class="library-card"><h3>${x.is_favorite?'⭐ ':''}${esc(x.title||x.topic)}</h3><div class="meta">/${esc(x.mode)} • ${new Date(x.created_at).toLocaleString()}</div><div class="meta">Topic: ${esc(x.topic)}</div>${x.quiz_score!=null?`<div class="meta">Quiz score: ${x.quiz_score}/${x.quiz_total}</div>`:''}<div class="library-actions"><button class="primary" onclick="openItem('${x.id}')">Open</button><button class="secondary star" onclick="toggleFavorite('${x.id}',${!x.is_favorite})">${x.is_favorite?'★':'☆'}</button><button class="danger" onclick="deleteItem('${x.id}')">Delete</button></div></div>`).join(''):'<div class="empty">No saved learning matches your search.</div>';
+}
+
+function getItem(id){ return libraryItems.find(x=>x.id===id); }
+function openItem(id){ const item=getItem(id); if(!item)return; $('libraryOpen').innerHTML=`<h2 class="view-title">${esc(item.title||item.topic)}</h2><div id="openedResult"></div><div class="panel"><h3>Personal notes</h3><textarea id="personalNotes" class="notesbox" rows="5" placeholder="Add your own notes...">${esc(item.personal_notes||'')}</textarea><div style="margin-top:8px"><button class="primary" onclick="saveNotes('${item.id}')">Save notes</button></div></div>`; renderCurrent(item.payload,$('openedResult'),false); $('libraryOpen').scrollIntoView({behavior:'smooth'}); }
+async function saveNotes(id){ const item=getItem(id); const notes=$('personalNotes').value; const {error}=await sb.from('learning_items').update({personal_notes:notes,updated_at:new Date().toISOString()}).eq('id',id); if(error)alert(error.message); else{item.personal_notes=notes;alert('Notes saved.');} }
+async function toggleFavorite(id,value){ const {error}=await sb.from('learning_items').update({is_favorite:value,updated_at:new Date().toISOString()}).eq('id',id); if(error)alert(error.message); else loadLibrary(); }
+async function deleteItem(id){ if(!confirm('Delete this saved learning item?'))return; const {error}=await sb.from('learning_items').delete().eq('id',id); if(error)alert(error.message); else{ $('libraryOpen').innerHTML=''; loadLibrary(); } }
+
+init().catch(err=>{document.body.insertAdjacentHTML('afterbegin','<div class="error" style="margin:12px">Startup error: '+esc(err.message)+'</div>');});
 </script>
-
 </body>
-
 </html>
