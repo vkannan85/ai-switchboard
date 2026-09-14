@@ -21,7 +21,6 @@ function safeJsonParse(text){
     throw new Error("Model returned invalid JSON");
   }
 }
-
 async function requireUser(req,res,next){
   try{
     const authHeader=req.headers.authorization||"";
@@ -32,13 +31,11 @@ async function requireUser(req,res,next){
     req.user=await response.json(); next();
   }catch(error){ console.error("Auth validation error:",error); res.status(401).json({error:"Unable to verify your sign-in."}); }
 }
-
 function getUserOpenAIClient(req){
   const apiKey=String(req.headers["x-openai-key"]||"").trim();
   if(!apiKey){ const error=new Error("Add your own OpenAI API key before generating. The key is used only for your request and is not stored by this app."); error.statusCode=400; throw error; }
   return new OpenAI({apiKey});
 }
-
 async function generateJson(client,system,user){
   const response=await client.chat.completions.create({model:"gpt-4o-mini",response_format:{type:"json_object"},temperature:.5,messages:[{role:"system",content:system},{role:"user",content:user}]});
   return safeJsonParse(response.choices?.[0]?.message?.content||"{}");
@@ -52,14 +49,12 @@ async function generateImage(client,prompt){
 }
 
 app.get("/api/config",(_req,res)=>res.json({supabaseUrl:SUPABASE_URL,supabasePublishableKey:SUPABASE_PUBLISHABLE_KEY}));
-
 app.post("/api/generate",requireUser,async(req,res)=>{
   try{
     const client=getUserOpenAIClient(req);
     const mode=String(req.body?.mode||"").toLowerCase();
     const topic=cleanTopic(req.body?.topic);
     if(!topic) return res.status(400).json({error:"Please enter a topic."});
-
     if(mode==="handwritten"){
       const image=await generateImage(client,`Create a beautiful educational handwritten notebook page about "${topic}". Genuine handwritten student revision notes on portrait ruled paper, neat blue and black ink, tasteful highlighter accents, hand-drawn arrows, boxes and underlines, and a small labelled educational sketch where useful. Include a clear title, simple definition, important keywords, key facts, short explanations and one memorable exam tip. Keep text moderate and readable. Accurate for a secondary-school learner. Show the notebook page only. No hands, desk, pens, people, typed document, PowerPoint or digital infographic.`);
       return res.json({type:"image",mode:"handwritten",image});
@@ -118,53 +113,29 @@ app.post("/api/generate",requireUser,async(req,res)=>{
   }
 });
 
-const passwordResetEnhancement = `
-<style>
-#forgotPassword{background:transparent;border:0;color:#635bff;font-weight:800;cursor:pointer;padding:10px 4px}
-#resetOverlay{position:fixed;inset:0;background:rgba(23,32,51,.55);display:none;align-items:center;justify-content:center;padding:18px;z-index:9999;backdrop-filter:blur(6px)}
-#resetOverlay.open{display:flex}#resetBox{width:min(460px,100%);background:white;border-radius:22px;padding:24px;box-shadow:0 24px 70px rgba(0,0,0,.25)}#resetBox input{width:100%;border:1px solid rgba(92,111,154,.22);border-radius:14px;padding:13px;margin:8px 0}#resetBox .resetActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-</style>
+const forgotButton = '<button id="forgotPassword" type="button" style="background:transparent;border:0;color:#635bff;font-weight:800;cursor:pointer;padding:10px 4px">Forgot password?</button>';
+const resetEnhancement = `
+<style>#resetOverlay{position:fixed;inset:0;background:rgba(23,32,51,.55);display:none;align-items:center;justify-content:center;padding:18px;z-index:9999;backdrop-filter:blur(6px)}#resetOverlay.open{display:flex}#resetBox{width:min(460px,100%);background:white;border-radius:22px;padding:24px;box-shadow:0 24px 70px rgba(0,0,0,.25)}#resetBox input{width:100%;border:1px solid rgba(92,111,154,.22);border-radius:14px;padding:13px;margin:8px 0}#resetBox .resetActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}</style>
 <div id="resetOverlay"><div id="resetBox"><h2 style="margin-top:0">🔐 Choose a new password</h2><p style="color:#68738a">Enter a new password for your Learning Switchboard account.</p><input id="newPassword" type="password" placeholder="New password (minimum 6 characters)"><input id="confirmPassword" type="password" placeholder="Confirm new password"><div id="resetMessage" style="font-size:13px;color:#68738a;margin-top:5px"></div><div class="resetActions"><button id="updatePassword" class="primary">Update password</button><button id="cancelReset" class="secondary">Cancel</button></div></div></div>
-<script>
-(function(){
-  function addForgotButton(){
-    var card=document.getElementById('authCard');
-    if(!card||document.getElementById('forgotPassword')) return;
-    var btn=document.createElement('button'); btn.id='forgotPassword'; btn.type='button'; btn.textContent='Forgot password?';
-    var msg=document.getElementById('authMessage'); card.insertBefore(btn,msg||null);
-    btn.onclick=async function(){
-      var email=(document.getElementById('email')?.value||'').trim();
-      if(!email){ if(msg) msg.textContent='Enter your email address first, then tap Forgot password.'; return; }
-      btn.disabled=true; btn.textContent='Sending reset email...';
-      try{
-        var result=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+'/'});
-        if(result.error) throw result.error;
-        if(msg) msg.textContent='Password reset email sent. Open the link in your email to choose a new password.';
-      }catch(e){ if(msg) msg.textContent=e.message||'Could not send password reset email.'; }
-      finally{btn.disabled=false;btn.textContent='Forgot password?';}
-    };
-  }
-  function openReset(){document.getElementById('resetOverlay')?.classList.add('open');}
-  function closeReset(){document.getElementById('resetOverlay')?.classList.remove('open');}
-  var timer=setInterval(function(){if(window.sb){clearInterval(timer);addForgotButton();sb.auth.onAuthStateChange(function(event){if(event==='PASSWORD_RECOVERY')openReset();});}},100);
-  document.getElementById('cancelReset').onclick=closeReset;
-  document.getElementById('updatePassword').onclick=async function(){
-    var p=document.getElementById('newPassword').value, c=document.getElementById('confirmPassword').value, m=document.getElementById('resetMessage');
-    if(p.length<6){m.textContent='Password must be at least 6 characters.';return;}
-    if(p!==c){m.textContent='The passwords do not match.';return;}
-    this.disabled=true;m.textContent='Updating password...';
-    try{var result=await sb.auth.updateUser({password:p});if(result.error)throw result.error;m.textContent='Password updated successfully. You can now continue learning.';setTimeout(closeReset,1200);}catch(e){m.textContent=e.message||'Could not update password.';}finally{this.disabled=false;}
-  };
-})();
-</script>`;
+<script>(function(){
+function openReset(){document.getElementById('resetOverlay').classList.add('open')}
+function closeReset(){document.getElementById('resetOverlay').classList.remove('open')}
+var forgot=document.getElementById('forgotPassword');
+if(forgot) forgot.onclick=async function(){var msg=document.getElementById('authMessage'),email=(document.getElementById('email').value||'').trim();if(!email){msg.textContent='Enter your email address first, then tap Forgot password.';return;}forgot.disabled=true;forgot.textContent='Sending reset email...';try{var r=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+'/'});if(r.error)throw r.error;msg.textContent='Password reset email sent. Open the link in your email to choose a new password.';}catch(e){msg.textContent=e.message||'Could not send password reset email.';}finally{forgot.disabled=false;forgot.textContent='Forgot password?';}};
+var poll=setInterval(function(){try{if(typeof sb!=='undefined'&&sb){clearInterval(poll);sb.auth.onAuthStateChange(function(event){if(event==='PASSWORD_RECOVERY')openReset();});}}catch(_){ }},100);
+document.getElementById('cancelReset').onclick=closeReset;
+document.getElementById('updatePassword').onclick=async function(){var p=document.getElementById('newPassword').value,c=document.getElementById('confirmPassword').value,m=document.getElementById('resetMessage');if(p.length<6){m.textContent='Password must be at least 6 characters.';return;}if(p!==c){m.textContent='The passwords do not match.';return;}this.disabled=true;m.textContent='Updating password...';try{var r=await sb.auth.updateUser({password:p});if(r.error)throw r.error;m.textContent='Password updated successfully.';setTimeout(closeReset,900);}catch(e){m.textContent=e.message||'Could not update password.';}finally{this.disabled=false;}};
+})();</script>`;
 
 function sendApp(_req,res){
   try{
-    const html=fs.readFileSync(path.join(__dirname,"index.html"),"utf8");
-    res.type("html").send(html.replace("</body>",passwordResetEnhancement+"</body>"));
+    let html=fs.readFileSync(path.join(__dirname,"index.html"),"utf8");
+    html=html.replace('<button id="signUp" class="secondary">Create account</button></div>','<button id="signUp" class="secondary">Create account</button>'+forgotButton+'</div>');
+    html=html.replace("</body>",resetEnhancement+"</body>");
+    res.type("html").send(html);
   }catch(error){console.error("App shell error:",error);res.status(500).send("Unable to load the app.");}
 }
 app.get("/",sendApp);
 app.get("/index.html",sendApp);
 app.get("*",sendApp);
-app.listen(PORT,"0.0.0.0",()=>console.log(`AI Learning Switchboard v2.3 running on port ${PORT}`));
+app.listen(PORT,"0.0.0.0",()=>console.log(`AI Learning Switchboard v2.3.1 running on port ${PORT}`));
