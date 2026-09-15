@@ -1,5 +1,5 @@
 {
   "name":"ai-learning-switchboard","version":"1.1.0","private":true,"description":"AI Learning Hub for secondary-school learning","main":"server.js",
-  "scripts":{"start":"node -r ./login-patch.js -r ./english-patch.js -r ./path-patch.js -r ./english-vocab-history.js -r ./english-vocab-weekly-fix.js -r ./english-vocab-mastery.js -r ./english-vocab-context-fix.js -r ./english-school-vocab-api.js -r ./english-school-words.js -r ./portal-redesign.js -r ./reading-fix.js -r ./reading-ui.js server.js"},
+  "scripts":{"start":"node -r ./login-patch.js -r ./english-patch.js -r ./path-patch.js -r ./english-vocab-history.js -r ./english-vocab-weekly-fix.js -r ./english-vocab-mastery.js -r ./english-vocab-context-fix.js -r ./english-school-vocab-api.js -r ./english-school-words.js -r ./portal-redesign.js -r ./reading-fix.js -r ./reading-ui.js -r ./english-skills-trim.js server.js"},
   "dependencies":{"dotenv":"^16.4.7","express":"^4.21.2","openai":"^4.77.0"}
 }
