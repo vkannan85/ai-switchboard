@@ -5,7 +5,7 @@
   "description": "AI Learning Hub for secondary-school learning",
   "main": "server.js",
   "scripts": {
-    "start": "node -r ./login-patch.js -r ./english-patch.js -r ./english-vocab-history.js -r ./english-vocab-weekly-fix.js server.js"
+    "start": "node -r ./login-patch.js -r ./english-patch.js -r ./english-vocab-history.js -r ./english-vocab-weekly-fix.js -r ./english-vocab-mastery.js server.js"
   },
   "dependencies": {
     "dotenv": "^16.4.7",
