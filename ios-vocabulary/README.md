@@ -1,19 +1,24 @@
-# Vocabulary iOS App
+# Vocabulary Hub for iOS
 
-A personal SwiftUI vocabulary app extracted from AI Learning Hub.
+Private SwiftUI vocabulary app based on the AI Learning Hub vocabulary workflow.
 
-## Included
-- Daily 5 dashboard
-- School + Year 7 word badges
-- Meanings and example sentences
-- Swipeable flashcards
-- Known / Need Practice progress
-- Weekly recap
-- History
-- iOS text-to-speech pronunciation
-- Local persistence with UserDefaults
+## Features
+- Daily 5: exactly 2 school words + 3 Year 7 words
+- 10-week school vocabulary
+- Flashcards and British-English text-to-speech
+- Known / Need Practice tracking
+- Fill-the-gap quiz
+- Weekly recap and history
+- Local offline persistence
+- Optional Supabase sign-in/sync with existing `english_vocabulary_progress` and `english_vocabulary_mastery`
 
-## Open in Xcode
-Create a new iOS App project named VocabularyHub (SwiftUI), then add the Swift files in VocabularyHub/ to the app target. iOS 17+ recommended.
+## Xcode setup
+1. Open `VocabularyHub.xcodeproj` in Xcode 16+.
+2. Add Swift Package Dependency: `https://github.com/supabase/supabase-swift` and add the `Supabase` product to the VocabularyHub target.
+3. Copy `Config.example.xcconfig` to `Config.xcconfig` and put the existing Supabase project URL and **publishable** key there. Never use a secret/service-role key in the iOS app.
+4. Set your personal Development Team under Signing & Capabilities.
+5. Choose your iPhone or simulator and press Run.
 
-The initial school vocabulary is included in VocabularyStore.swift. The architecture is deliberately dependency-free so it can run privately without publishing to the App Store.
+The existing Supabase vocabulary tables already use per-user RLS. The app also works locally if Supabase is not configured.
+
+Supabase's current SwiftUI quickstart recommends Swift Package Manager and a publishable key for mobile clients; RLS remains the security boundary.
