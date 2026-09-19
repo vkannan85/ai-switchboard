@@ -1,0 +1,4 @@
+// Copy this file to Config.xcconfig locally. Do not commit real secret keys.
+// The publishable key is safe for a mobile client when RLS is correctly configured.
+SUPABASE_URL = https://YOUR_PROJECT_REF.supabase.co
+SUPABASE_PUBLISHABLE_KEY = sb_publishable_YOUR_KEY
