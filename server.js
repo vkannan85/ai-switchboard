@@ -10,7 +10,8 @@ const SUPABASE_URL = "https://rikeknoqjmnxkgfutmpy.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_NfbRUCQo1cb0rMmJ1pHcaA_AsuubptW";
 
 app.use(express.json({ limit: "2mb" }));
-app.use(express.static(__dirname, { index: false }));
+app.use((req,res,next)=>{ if(req.path==="/vocabulary"||req.path==="/vocabulary/") return res.sendFile(path.join(__dirname,"vocabulary","index.html")); next(); });
+app.use(express.static(__dirname, { index: false, redirect: false }));
 
 function cleanTopic(topic){ return String(topic || "").trim().slice(0,500); }
 function safeJsonParse(text){
@@ -228,7 +229,6 @@ function sendApp(_req,res){
     res.type("html").send(html);
   }catch(error){console.error("App shell error:",error);res.status(500).send("Unable to load the app.");}
 }
-app.get(["/vocabulary","/vocabulary/"],(_req,res)=>res.sendFile(path.join(__dirname,"vocabulary","index.html")));
 app.get("/",sendApp);
 app.get("/index.html",sendApp);
 app.get("*",sendApp);
