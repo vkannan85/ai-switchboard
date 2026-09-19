@@ -228,8 +228,7 @@ function sendApp(_req,res){
     res.type("html").send(html);
   }catch(error){console.error("App shell error:",error);res.status(500).send("Unable to load the app.");}
 }
-app.get("/vocabulary",(_req,res)=>res.redirect("/vocabulary/"));
-app.get("/vocabulary/",(_req,res)=>res.sendFile(path.join(__dirname,"vocabulary","index.html")));
+app.get(["/vocabulary","/vocabulary/"],(_req,res)=>res.sendFile(path.join(__dirname,"vocabulary","index.html")));
 app.get("/",sendApp);
 app.get("/index.html",sendApp);
 app.get("*",sendApp);
