@@ -51,6 +51,22 @@ async function generateImage(client,prompt){
 
 app.get("/api/config",(_req,res)=>res.json({supabaseUrl:SUPABASE_URL,supabasePublishableKey:SUPABASE_PUBLISHABLE_KEY}));
 
+app.post("/api/vocabulary/sentence-feedback",requireUser,async(req,res)=>{
+  try{
+    const client=getUserOpenAIClient(req);
+    const word=String(req.body?.word||"").trim().slice(0,100);
+    const sentence=String(req.body?.sentence||"").trim().slice(0,1000);
+    if(!word||!sentence) return res.status(400).json({error:"Write a sentence first."});
+    const data=await generateJson(client,
+      'You are a warm, encouraging UK Year 7 English teacher. Review one pupil sentence using a target vocabulary word. Judge whether the target word is used with the correct meaning and grammar, then check spelling, grammar, punctuation and clarity. Do not be harsh. Return ONLY valid JSON: {"correct":true,"praise":"one short positive comment","feedback":"one or two clear age-appropriate improvement points","correctedSentence":"a corrected natural version of the pupil sentence","wordUse":"short explanation of whether the vocabulary word was used correctly"}. Preserve the pupil meaning. If already excellent, correctedSentence should repeat it with only necessary corrections. No markdown.',
+      'Target vocabulary word: '+word+'\\nPupil sentence: '+sentence);
+    return res.json(data);
+  }catch(error){
+    console.error("Vocabulary sentence feedback error:",error);
+    res.status(error?.statusCode||500).json({error:error?.error?.message||error?.message||"Unable to check the sentence."});
+  }
+});
+
 app.post("/api/maths",requireUser,async(req,res)=>{
   try{
     const client=getUserOpenAIClient(req);
